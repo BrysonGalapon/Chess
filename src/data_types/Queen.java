@@ -1,0 +1,90 @@
+package data_types;
+
+import java.util.Set;
+
+/**
+ * Represents a Queen at a Coordinate on a chess board
+ * @author bgalapon
+ */
+public class Queen implements Piece {
+    private final PieceColor color;
+    
+    private static final Coordinate D4_COORDINATE = new Coordinate(3, 3);
+    
+    // Abstraction Function: 
+    //  - represents a Queen with color color located at coordinate coordinate
+    // 
+    // Rep Invariant: 
+    //  -  true
+    // 
+    // Safety from Rep Exposure:
+    //  - all fields are private and final
+    //  - all inputs are immutable
+    //  - all outputs that are mutable are defensively copied
+    //
+    
+    /**
+     * Create a new Queen
+     * @param color of this Queen
+     */
+    public Queen(PieceColor color) {
+        this.color = color;
+    }
+    
+    /** 
+     * Assert the Rep Invariant.
+     */
+    private void checkRep() {
+        assert true;
+    }
+    
+    @Override
+    public Set<Coordinate> moveSet(Coordinate coord) {
+        // imagine a rook and a bishop on the same square
+        Piece rook = Piece.rook(color);
+        Piece bishop = Piece.bishop(color);
+        
+        // concactenate their moveSets
+        final Set<Coordinate> moves = rook.moveSet(coord);
+        moves.addAll(bishop.moveSet(coord));
+        
+        checkRep();
+        return moves;
+    }
+    
+    @Override
+    public PieceColor color() {
+        return color;
+    }
+
+    @Override
+    public boolean exists() {
+        return true;
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if (! (other instanceof Queen)) {return false;}
+        
+        Queen otherQueen = (Queen) other; 
+        
+        // considered equivalent if they have an equivalent moveSet when placed on d4
+        return this.moveSet(D4_COORDINATE).equals(otherQueen.moveSet(D4_COORDINATE)) && this.color().equals(otherQueen.color());
+    }
+        
+    @Override
+    public String toString() {
+        return "Q";
+    }
+    
+    @Override
+    public int hashCode() {
+        return moveSet(D4_COORDINATE).size() + (color().equals(PieceColor.BLACK) ? 0 : 1);
+    }
+
+    @Override
+    public boolean isPawn() {
+        return false;
+    }
+
+}
