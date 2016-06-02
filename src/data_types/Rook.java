@@ -9,6 +9,7 @@ import java.util.Set;
  */
 public class Rook implements Piece {
     private final PieceColor color;
+    private final boolean moved;
     
     private static final Coordinate D4_COORDINATE = new Coordinate(3, 3);
 
@@ -29,8 +30,10 @@ public class Rook implements Piece {
      * Create a new Rook
      * @param color of this Rook
      */
-    public Rook(PieceColor color) {
+    public Rook(PieceColor color, boolean moved) {
         this.color = color;
+        this.moved = moved;
+        checkRep();
     }
     
     /** 
@@ -79,8 +82,12 @@ public class Rook implements Piece {
         
         Rook otherRook = (Rook) other; 
         
+        boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherRook.moveSet(D4_COORDINATE));
+        boolean colorSame = this.color().equals(otherRook.color());
+        boolean movedSame = this.moved() == otherRook.moved();
+        
         // considered equivalent if they have an equivalent moveSet when placed on d4
-        return this.moveSet(D4_COORDINATE).equals(otherRook.moveSet(D4_COORDINATE)) && this.color().equals(otherRook.color());
+        return  moveSetSame && colorSame && movedSame;
     }
         
     @Override
@@ -96,5 +103,10 @@ public class Rook implements Piece {
     @Override
     public boolean isPawn() {
         return false;
+    }
+
+    @Override
+    public boolean moved() {
+        return moved;
     }
 }

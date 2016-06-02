@@ -106,8 +106,8 @@ public class Board {
                 assert grid[row][col].squareCoordinate().getY() == col;
             }
         }
-        Set<Coordinate> whiteKingPlacement = whitePieces().get(Piece.king(PieceColor.WHITE));
-        Set<Coordinate> blackKingPlacement = blackPieces().get(Piece.king(PieceColor.BLACK));
+        Set<Coordinate> whiteKingPlacement = whitePieces().get(retrieveKing(PieceColor.WHITE));
+        Set<Coordinate> blackKingPlacement = blackPieces().get(retrieveKing(PieceColor.BLACK));
         assert whiteKingPlacement.size() == 1;
         assert blackKingPlacement.size() == 1;
     }
@@ -473,6 +473,51 @@ public class Board {
     /////////////////////// PRIVATE HELPER METHODS ///////////////////////
     //////////////////////////////////////////////////////////////////////
     
+    /**
+     * Retrieve the piece of color color on this board
+     * @param color color of king to retrieve
+     * @return the king of this color on this board
+     */
+    private Piece retrieveKing(PieceColor color) {
+        Map<Piece, Set<Coordinate>> pieces;
+        
+        if (color.equals(PieceColor.WHITE)) {
+            pieces = whitePieces();
+        } else if (color.equals(PieceColor.BLACK)) {
+            pieces = blackPieces();
+        } else {
+            throw new RuntimeException("Color is not one of white or black");
+        }
+        
+        Piece movedKing = Piece.king(color, true);
+        Piece unmovedKing = Piece.king(color, false);
+        
+        boolean movedKingOnBoard;
+        boolean unmovedKingOnBoard;
+        
+        if (pieces.keySet().contains(movedKing)) {
+            movedKingOnBoard = pieces.get(movedKing).size() == 1;
+        } else {
+            movedKingOnBoard = false;
+        }
+        
+        if (pieces.keySet().contains(unmovedKing)) {
+            unmovedKingOnBoard = pieces.get(unmovedKing).size() == 1;
+        } else {
+            unmovedKingOnBoard = false;
+        }
+        
+        if (movedKingOnBoard && unmovedKingOnBoard) {
+            throw new RuntimeException("May not have two kings on board at same time");
+        } else if (movedKingOnBoard) {
+            return movedKing;
+        } else if (unmovedKingOnBoard) {
+            return unmovedKing;
+        } else {
+            throw new RuntimeException("Must have at least one king on the board");
+        }
+    }
+    
     private Set<Move> filterChecks(Set<Move> moveSet) {
         Set<Move> filteredMoves = new HashSet<Move>();
         for (Move move : moveSet) {
@@ -658,10 +703,12 @@ public class Board {
             throw new RuntimeException("Color is neither one of black or white");
         }
         
-        // pop an arbitrary element from the set of king coordinates (it's size is 1, so it does not matter)
-        Coordinate currentKingCoord = currentPieces.get(Piece.king(turn())).iterator().next();
+        Piece kingOnBoard = retrieveKing(turn());
         
-        Set<Coordinate> kingPlacement = currentPieces.get(Piece.king(turn()));
+        // pop an arbitrary element from the set of king coordinates (it's size is 1, so it does not matter)
+        Coordinate currentKingCoord = currentPieces.get(kingOnBoard).iterator().next();
+        
+        Set<Coordinate> kingPlacement = currentPieces.get(kingOnBoard);
 
         // move the king to coord
         kingPlacement.remove(currentKingCoord);
@@ -694,8 +741,10 @@ public class Board {
             throw new RuntimeException("Color is neither one of black or white");
         }
         
+        Piece kingOnBoard = retrieveKing(turn());
+        
         // pop an arbitrary element from the set of king coordinates (it's size is 1, so it does not matter)
-        Coordinate currentKingCoord = currentPieces.get(Piece.king(turn())).iterator().next();
+        Coordinate currentKingCoord = currentPieces.get(kingOnBoard).iterator().next();
         
         for (Piece piece : otherPieces.keySet()) {
             if (piece.isPawn()) {
@@ -772,7 +821,7 @@ public class Board {
         Square square1 = grid[1][rank];
         Square square2 = grid[6][rank];
 
-        Piece knight = Piece.knight(color);
+        Piece knight = Piece.knight(color, false);
 
         square1.addPiece(knight);
         square2.addPiece(knight);
@@ -791,7 +840,7 @@ public class Board {
         Square square1 = grid[0][rank];
         Square square2 = grid[7][rank];
 
-        Piece rook = Piece.rook(color);
+        Piece rook = Piece.rook(color, false);
 
         square1.addPiece(rook);
         square2.addPiece(rook);
@@ -810,7 +859,7 @@ public class Board {
         Square square1 = grid[2][rank];
         Square square2 = grid[5][rank];
 
-        Piece bishop = Piece.bishop(color);
+        Piece bishop = Piece.bishop(color, false);
 
         square1.addPiece(bishop);
         square2.addPiece(bishop);
@@ -828,7 +877,7 @@ public class Board {
         
         Square square = grid[4][rank];
 
-        Piece king = Piece.king(color);
+        Piece king = Piece.king(color, false);
 
         square.addPiece(king);
         
@@ -844,7 +893,7 @@ public class Board {
         
         Square square = grid[3][rank];
 
-        Piece queen = Piece.queen(color);
+        Piece queen = Piece.queen(color, false);
 
         square.addPiece(queen);
         

@@ -9,9 +9,9 @@ import java.util.Set;
 public interface Piece {
     
     // Data-type Definition:
-    // Piece = Pawn(coord:Coordinate, color:PieceColor) + Knight(coord:Coordinate, color:PieceColor) + 
-    //         Bishop(coord:Coordinate, color:PieceColor) + King(coord:Coordinate, color:PieceColor) + 
-    //         Queen(coord:Coordinate, color:PieceColor) + Rook(coord:Coordinate, color:PieceColor) +
+    // Piece = Pawn(moved:boolean, color:PieceColor) + Knight(moved:boolean, color:PieceColor) + 
+    //         Bishop(moved:boolean, color:PieceColor) + King(moved:boolean, color:PieceColor) + 
+    //         Queen(moved:boolean, color:PieceColor) + Rook(moved:boolean, color:PieceColor) +
     //         EmptyPiece()
     
     /**Create a new pawn with color color
@@ -23,33 +23,39 @@ public interface Piece {
     
     /**Create a new knight with color color
      */
-    public static Piece knight(PieceColor color) {
-        return new Knight(color);
+    public static Piece knight(PieceColor color, boolean moved) {
+        return new Knight(color, moved);
     }
     
     /**Create a new bishop with color color
      */
-    public static Piece bishop(PieceColor color) {
-        return new Bishop(color);
+    public static Piece bishop(PieceColor color, boolean moved) {
+        return new Bishop(color, moved);
     }
     
     /**Create a new rook with color color
      */
-    public static Piece rook(PieceColor color) {
-        return new Rook(color);
+    public static Piece rook(PieceColor color, boolean moved) {
+        return new Rook(color, moved);
     }
     
     /**Create a new queen with color color
      */
-    public static Piece queen(PieceColor color) {
-        return new Queen(color);
+    public static Piece queen(PieceColor color, boolean moved) {
+        return new Queen(color, moved);
     }
     
     /**Create a new king with color color
      */
-    public static Piece king(PieceColor color) {
-        return new King(color);
+    public static Piece king(PieceColor color, boolean moved) {
+        return new King(color, moved);
     }
+    
+    /**
+     * Check if this pawn has moved or not
+     * @return true if this pawn has moved
+     */
+    public boolean moved();
     
     /** Retrieve the move set of a particular chess piece on an empty board, including 
      *      capture moves, when placed on coord
@@ -77,6 +83,7 @@ public interface Piece {
      */
     public boolean isPawn();
     
+    // TODO Finish re-implementing equals/write tests for it
     @Override
     public boolean equals(Object other);
         

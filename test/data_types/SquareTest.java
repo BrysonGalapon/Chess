@@ -56,7 +56,7 @@ public class SquareTest {
     public void testAddPieceWhiteKnight() {
         Coordinate coord = new Coordinate(1,4);
         PieceColor color = PieceColor.WHITE;
-        Piece knight = Piece.knight(color);
+        Piece knight = Piece.knight(color, true);
         
         Square square = new Square(coord);
         square.addPiece(knight);
@@ -69,7 +69,7 @@ public class SquareTest {
     public void testRemovePieceOccupied() {
         Coordinate coord = new Coordinate(6,7);
         PieceColor color = PieceColor.WHITE;
-        Piece queen = Piece.queen(color);
+        Piece queen = Piece.queen(color, false);
         
         Square square = new Square(coord);
         square.addPiece(queen);
@@ -108,7 +108,7 @@ public class SquareTest {
     public void testGetPieceNotPawn() {
         Coordinate coord = new Coordinate(1,4);
         PieceColor color = PieceColor.BLACK;
-        Piece knight = Piece.knight(color);
+        Piece knight = Piece.knight(color, true);
         
         Square square = new Square(coord);
         square.addPiece(knight);
@@ -184,9 +184,9 @@ public class SquareTest {
         PieceColor white = PieceColor.WHITE;
         PieceColor black = PieceColor.BLACK;
         
-        Piece whiteKing = Piece.king(white);
-        Piece blackQueen = Piece.queen(black);
-        Piece whiteKnight = Piece.knight(white);
+        Piece whiteKing = Piece.king(white, true);
+        Piece blackQueen = Piece.queen(black, true);
+        Piece whiteKnight = Piece.knight(white, false);
         
         square.addPiece(blackQueen);
         square.addPiece(whiteKing);

@@ -29,7 +29,7 @@ public class MoveTest {
         Coordinate coordFrom = new Coordinate(0, 0);
         Coordinate coordTo = new Coordinate(3, 3);
         
-        Piece bishop = Piece.bishop(color);
+        Piece bishop = Piece.bishop(color, false);
         Square squareFrom = new Square(coordFrom);
         Square squareTo = new Square(coordTo);
         
@@ -59,7 +59,7 @@ public class MoveTest {
         Coordinate coordFrom = new Coordinate(0, 0);
         Coordinate coordTo = new Coordinate(5, 5);
         
-        Piece bishop = Piece.bishop(color);
+        Piece bishop = Piece.bishop(color, false);
         Square squareFrom = new Square(coordFrom);
         Square squareTo = new Square(coordTo);
         
@@ -80,7 +80,7 @@ public class MoveTest {
         Coordinate coordFrom = new Coordinate(6, 5);
         Coordinate coordTo = new Coordinate(7, 6);
         
-        Piece bishop = Piece.bishop(color);
+        Piece bishop = Piece.bishop(color, true);
         Square squareFrom = new Square(coordFrom);
         Square squareTo = new Square(coordTo);
         

@@ -62,4 +62,9 @@ public class EmptyPiece implements Piece {
     public boolean isPawn() {
         return false;
     }
+
+    @Override
+    public boolean moved() {
+        throw new RuntimeException("Called operation on non-existent piece");
+    }
 }

@@ -8,6 +8,7 @@ import java.util.Set;
  */
 public class Queen implements Piece {
     private final PieceColor color;
+    private final boolean moved;
     
     private static final Coordinate D4_COORDINATE = new Coordinate(3, 3);
     
@@ -27,8 +28,10 @@ public class Queen implements Piece {
      * Create a new Queen
      * @param color of this Queen
      */
-    public Queen(PieceColor color) {
+    public Queen(PieceColor color, boolean moved) {
         this.color = color;
+        this.moved = moved;
+        checkRep();
     }
     
     /** 
@@ -41,8 +44,8 @@ public class Queen implements Piece {
     @Override
     public Set<Coordinate> moveSet(Coordinate coord) {
         // imagine a rook and a bishop on the same square
-        Piece rook = Piece.rook(color);
-        Piece bishop = Piece.bishop(color);
+        Piece rook = Piece.rook(color, moved);
+        Piece bishop = Piece.bishop(color, moved);
         
         // concactenate their moveSets
         final Set<Coordinate> moves = rook.moveSet(coord);
@@ -68,8 +71,12 @@ public class Queen implements Piece {
         
         Queen otherQueen = (Queen) other; 
         
+        boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherQueen.moveSet(D4_COORDINATE));
+        boolean colorSame = this.color().equals(otherQueen.color());
+        boolean movedSame = this.moved() == otherQueen.moved();
+        
         // considered equivalent if they have an equivalent moveSet when placed on d4
-        return this.moveSet(D4_COORDINATE).equals(otherQueen.moveSet(D4_COORDINATE)) && this.color().equals(otherQueen.color());
+        return  moveSetSame && colorSame && movedSame;        
     }
         
     @Override
@@ -85,6 +92,11 @@ public class Queen implements Piece {
     @Override
     public boolean isPawn() {
         return false;
+    }
+
+    @Override
+    public boolean moved() {
+        return moved;
     }
 
 }

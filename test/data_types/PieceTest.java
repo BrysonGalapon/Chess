@@ -73,6 +73,8 @@ public class PieceTest {
     //  - piece is empty, piece is not empty
     // 
     
+    // TODO write tests for moved()    
+    
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
@@ -140,13 +142,13 @@ public class PieceTest {
     public void testIsPawn() {
         PieceColor color = PieceColor.BLACK;
         
-        Piece king = Piece.king(color);
-        Piece queen = Piece.queen(color);
+        Piece king = Piece.king(color, true);
+        Piece queen = Piece.queen(color, true);
         Piece pawn1 = Piece.pawn(color, false);
         Piece pawn2 = Piece.pawn(color, true);
-        Piece rook = Piece.rook(color);
-        Piece bishop = Piece.bishop(color);
-        Piece knight = Piece.knight(color);
+        Piece rook = Piece.rook(color, true);
+        Piece bishop = Piece.bishop(color, true);
+        Piece knight = Piece.knight(color, true);
         
         assertFalse("Expected king to be not a pawn", king.isPawn());
         assertFalse("Expected queen to be not a pawn", queen.isPawn());
@@ -211,7 +213,7 @@ public class PieceTest {
     public void testMoveSetKingCorner() {
         Coordinate coord = new Coordinate(0, 0);
         PieceColor color = PieceColor.WHITE;
-        Piece king = Piece.king(color);
+        Piece king = Piece.king(color, true);
         
         Set<Coordinate> moves = king.moveSet(coord);
         
@@ -227,7 +229,7 @@ public class PieceTest {
     public void testMoveSetKingEdge() {
         Coordinate coord = new Coordinate(1, 0);
         PieceColor color = PieceColor.WHITE;
-        Piece king = Piece.king(color);
+        Piece king = Piece.king(color, true);
         
         Set<Coordinate> moves = king.moveSet(coord);
         
@@ -245,7 +247,7 @@ public class PieceTest {
     public void testMoveSetKingCenter() {
         Coordinate coord = new Coordinate(1, 1);
         PieceColor color = PieceColor.WHITE;
-        Piece king = Piece.king(color);
+        Piece king = Piece.king(color, true);
         
         Set<Coordinate> moves = king.moveSet(coord);
         
@@ -266,7 +268,7 @@ public class PieceTest {
     public void testMoveSetKnightCorner() {
         Coordinate coord = new Coordinate(7, 7);
         PieceColor color = PieceColor.WHITE;
-        Piece knight = Piece.knight(color);
+        Piece knight = Piece.knight(color, true);
         
         Set<Coordinate> moves = knight.moveSet(coord);
         
@@ -281,7 +283,7 @@ public class PieceTest {
     public void testMoveSetKnightEdge() {
         Coordinate coord = new Coordinate(2, 7);
         PieceColor color = PieceColor.BLACK;
-        Piece knight = Piece.knight(color);
+        Piece knight = Piece.knight(color, true);
         
         Set<Coordinate> moves = knight.moveSet(coord);
         
@@ -298,7 +300,7 @@ public class PieceTest {
     public void testMoveSetKnightCenter() {
         Coordinate coord = new Coordinate(3, 3);
         PieceColor color = PieceColor.BLACK;
-        Piece knight = Piece.knight(color);
+        Piece knight = Piece.knight(color, true);
         
         Set<Coordinate> moves = knight.moveSet(coord);
         
@@ -319,7 +321,7 @@ public class PieceTest {
     public void testMoveSetBishopCorner() {
         Coordinate coord = new Coordinate(0, 7);
         PieceColor color = PieceColor.BLACK;
-        Piece bishop = Piece.bishop(color);
+        Piece bishop = Piece.bishop(color, true);
         
         Set<Coordinate> moves = bishop.moveSet(coord);
         
@@ -339,7 +341,7 @@ public class PieceTest {
     public void testMoveSetBishopEdge() {
         Coordinate coord = new Coordinate(0, 6);
         PieceColor color = PieceColor.BLACK;
-        Piece bishop = Piece.bishop(color);
+        Piece bishop = Piece.bishop(color, true);
         
         Set<Coordinate> moves = bishop.moveSet(coord);
         
@@ -359,7 +361,7 @@ public class PieceTest {
     public void testMoveSetBishopCenter() {
         Coordinate coord = new Coordinate(3, 3);
         PieceColor color = PieceColor.BLACK;
-        Piece bishop = Piece.bishop(color);
+        Piece bishop = Piece.bishop(color, true);
         
         Set<Coordinate> moves = bishop.moveSet(coord);
         
@@ -385,7 +387,7 @@ public class PieceTest {
     public void testMoveSetRookCorner() {
         Coordinate coord = new Coordinate(0, 0);
         PieceColor color = PieceColor.BLACK;
-        Piece rook = Piece.rook(color);
+        Piece rook = Piece.rook(color, true);
         
         Set<Coordinate> moves = rook.moveSet(coord);
         
@@ -412,7 +414,7 @@ public class PieceTest {
     public void testMoveSetRookEdge() {
         Coordinate coord = new Coordinate(2, 0);
         PieceColor color = PieceColor.BLACK;
-        Piece rook = Piece.rook(color);
+        Piece rook = Piece.rook(color, true);
         
         Set<Coordinate> moves = rook.moveSet(coord);
         
@@ -439,7 +441,7 @@ public class PieceTest {
     public void testMoveSetRookCenter() {
         Coordinate coord = new Coordinate(2, 3);
         PieceColor color = PieceColor.BLACK;
-        Piece rook = Piece.rook(color);
+        Piece rook = Piece.rook(color, true);
         
         Set<Coordinate> moves = rook.moveSet(coord);
         
@@ -466,7 +468,7 @@ public class PieceTest {
     public void testMoveSetQueenCorner() {
         Coordinate coord = new Coordinate(0, 0);
         PieceColor color = PieceColor.BLACK;
-        Piece queen = Piece.queen(color);
+        Piece queen = Piece.queen(color, true);
         
         Set<Coordinate> moves = queen.moveSet(coord);
         
@@ -500,7 +502,7 @@ public class PieceTest {
     public void testMoveSetQueenEdge() {
         Coordinate coord = new Coordinate(0, 6);
         PieceColor color = PieceColor.BLACK;
-        Piece queen = Piece.queen(color);
+        Piece queen = Piece.queen(color, true);
         
         Set<Coordinate> moves = queen.moveSet(coord);
         
@@ -534,7 +536,7 @@ public class PieceTest {
     public void testMoveSetQueenCenter() {
         Coordinate coord = new Coordinate(3, 3);
         PieceColor color = PieceColor.BLACK;
-        Piece queen = Piece.queen(color);
+        Piece queen = Piece.queen(color, true);
         
         Set<Coordinate> moves = queen.moveSet(coord);
         
@@ -573,7 +575,7 @@ public class PieceTest {
     @Test
     public void testToStringKing() {
         PieceColor color = PieceColor.WHITE;
-        Piece king = Piece.king(color);
+        Piece king = Piece.king(color, true);
         
         assertEquals("Expected K for king", "K", king.toString());
     }
@@ -581,7 +583,7 @@ public class PieceTest {
     @Test
     public void testToStringQueen() {
         PieceColor color = PieceColor.WHITE;
-        Piece queen = Piece.queen(color);
+        Piece queen = Piece.queen(color, true);
         
         assertEquals("Expected Q for queen", "Q", queen.toString());
     }
@@ -589,7 +591,7 @@ public class PieceTest {
     @Test
     public void testToStringRook() {
         PieceColor color = PieceColor.WHITE;
-        Piece rook = Piece.rook(color);
+        Piece rook = Piece.rook(color, true);
         
         assertEquals("Expected R for rook", "R", rook.toString());
     }
@@ -605,7 +607,7 @@ public class PieceTest {
     @Test
     public void testToStringKnight() {
         PieceColor color = PieceColor.WHITE;
-        Piece knight = Piece.knight(color);
+        Piece knight = Piece.knight(color, true);
         
         assertEquals("Expected N for knight", "N", knight.toString());
     }
@@ -613,7 +615,7 @@ public class PieceTest {
     @Test
     public void testToStringBishop() {
         PieceColor color = PieceColor.WHITE;
-        Piece bishop = Piece.bishop(color);
+        Piece bishop = Piece.bishop(color, true);
         
         assertEquals("Expected B for bishop", "B", bishop.toString());
     }
@@ -623,11 +625,11 @@ public class PieceTest {
         PieceColor color = PieceColor.WHITE;
         
         Piece pawn = Piece.pawn(color, true);
-        Piece king = Piece.king(color);
-        Piece queen = Piece.queen(color);
-        Piece rook = Piece.rook(color);
-        Piece knight = Piece.knight(color);
-        Piece bishop = Piece.bishop(color);
+        Piece king = Piece.king(color, true);
+        Piece queen = Piece.queen(color, true);
+        Piece rook = Piece.rook(color, true);
+        Piece knight = Piece.knight(color, true);
+        Piece bishop = Piece.bishop(color, true);
         Piece empty = new EmptyPiece();
         
         assertTrue("Pawns exist.", pawn.exists());
@@ -645,7 +647,7 @@ public class PieceTest {
         PieceColor white = PieceColor.WHITE;
         
         Piece pawn = Piece.pawn(black, true);
-        Piece king = Piece.king(white);
+        Piece king = Piece.king(white, true);
         
         assertEquals("Expected a black pawn to be black", PieceColor.BLACK, pawn.color());
         assertEquals("Expected a white king to be white", PieceColor.WHITE, king.color());
@@ -658,29 +660,29 @@ public class PieceTest {
         
         Piece blackPawn1 = Piece.pawn(black, true);
         Piece whitePawn1 = Piece.pawn(white, true);
-        Piece blackRook1 = Piece.rook(black);
-        Piece whiteRook1 = Piece.rook(white);
-        Piece blackBishop1 = Piece.bishop(black);
-        Piece whiteBishop1 = Piece.bishop(white);
-        Piece blackKnight1 = Piece.knight(black);
-        Piece whiteKnight1 = Piece.knight(white);
-        Piece blackKing1 = Piece.king(black);
-        Piece whiteKing1 = Piece.king(white);
-        Piece blackQueen1 = Piece.queen(black);
-        Piece whiteQueen1 = Piece.queen(white);
+        Piece blackRook1 = Piece.rook(black, true);
+        Piece whiteRook1 = Piece.rook(white, true);
+        Piece blackBishop1 = Piece.bishop(black, true);
+        Piece whiteBishop1 = Piece.bishop(white, true);
+        Piece blackKnight1 = Piece.knight(black, true);
+        Piece whiteKnight1 = Piece.knight(white, true);
+        Piece blackKing1 = Piece.king(black, true);
+        Piece whiteKing1 = Piece.king(white, true);
+        Piece blackQueen1 = Piece.queen(black, true);
+        Piece whiteQueen1 = Piece.queen(white, true);
         
         Piece blackPawn2 = Piece.pawn(black, true);
         Piece whitePawn2 = Piece.pawn(white, true);
-        Piece blackRook2 = Piece.rook(black);
-        Piece whiteRook2 = Piece.rook(white);
-        Piece blackBishop2 = Piece.bishop(black);
-        Piece whiteBishop2 = Piece.bishop(white);
-        Piece blackKnight2 = Piece.knight(black);
-        Piece whiteKnight2 = Piece.knight(white);
-        Piece blackKing2 = Piece.king(black);
-        Piece whiteKing2 = Piece.king(white);
-        Piece blackQueen2 = Piece.queen(black);
-        Piece whiteQueen2 = Piece.queen(white);
+        Piece blackRook2 = Piece.rook(black, true);
+        Piece whiteRook2 = Piece.rook(white, true);
+        Piece blackBishop2 = Piece.bishop(black, true);
+        Piece whiteBishop2 = Piece.bishop(white, true);
+        Piece blackKnight2 = Piece.knight(black, true);
+        Piece whiteKnight2 = Piece.knight(white, true);
+        Piece blackKing2 = Piece.king(black, true);
+        Piece whiteKing2 = Piece.king(white, true);
+        Piece blackQueen2 = Piece.queen(black, true);
+        Piece whiteQueen2 = Piece.queen(white, true);
         
         assertEquals("Expected equivalent pieces to be equivalent", blackPawn1, blackPawn2);
         assertEquals("Expected equivalent pieces to be equivalent", whitePawn1, whitePawn2);

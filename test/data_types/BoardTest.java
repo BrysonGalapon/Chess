@@ -30,16 +30,16 @@ public class BoardTest {
 
         Set<Coordinate> whitePawns = whitePieces.get(Piece.pawn(white, false));
         Set<Coordinate> blackPawns = blackPieces.get(Piece.pawn(black, false));
-        Set<Coordinate> whiteRooks = whitePieces.get(Piece.rook(white));
-        Set<Coordinate> blackRooks = blackPieces.get(Piece.rook(black));
-        Set<Coordinate> whiteKnights = whitePieces.get(Piece.knight(white));
-        Set<Coordinate> blackKnights = blackPieces.get(Piece.knight(black));
-        Set<Coordinate> whiteBishops = whitePieces.get(Piece.bishop(white));
-        Set<Coordinate> blackBishops = blackPieces.get(Piece.bishop(black));
-        Set<Coordinate> whiteKing = whitePieces.get(Piece.king(white));
-        Set<Coordinate> blackKing = blackPieces.get(Piece.king(black));
-        Set<Coordinate> whiteQueen = whitePieces.get(Piece.queen(white));
-        Set<Coordinate> blackQueen = blackPieces.get(Piece.queen(black));
+        Set<Coordinate> whiteRooks = whitePieces.get(Piece.rook(white, false));
+        Set<Coordinate> blackRooks = blackPieces.get(Piece.rook(black, false));
+        Set<Coordinate> whiteKnights = whitePieces.get(Piece.knight(white, false));
+        Set<Coordinate> blackKnights = blackPieces.get(Piece.knight(black, false));
+        Set<Coordinate> whiteBishops = whitePieces.get(Piece.bishop(white, false));
+        Set<Coordinate> blackBishops = blackPieces.get(Piece.bishop(black, false));
+        Set<Coordinate> whiteKing = whitePieces.get(Piece.king(white, false));
+        Set<Coordinate> blackKing = blackPieces.get(Piece.king(black, false));
+        Set<Coordinate> whiteQueen = whitePieces.get(Piece.queen(white, false));
+        Set<Coordinate> blackQueen = blackPieces.get(Piece.queen(black, false));
 
         assertEquals("Expected 8 white pawns", 8, whitePawns.size());
         assertEquals("Expected 8 black pawns", 8, blackPawns.size());
@@ -175,19 +175,19 @@ public class BoardTest {
         blackKingPlacement.add(new Coordinate("b1"));
         whiteRookPlacement.add(new Coordinate("c1"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        whitePieces.put(Piece.rook(white), whiteRookPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.rook(white, true), whiteRookPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.BLACK;
         
         Board board = new Board(whitePieces, blackPieces, turn);
         
-        Move move = new Move(Piece.king(black), board.getSquare("b1"), board.getSquare("c1"));
+        Move move = new Move(Piece.king(black, true), board.getSquare("b1"), board.getSquare("c1"));
         
         board.move(move);
         
-        assertEquals("Expected king to take on c1", Piece.king(black), board.getSquare("c1").getPiece());
+        assertEquals("Expected king to take on c1", Piece.king(black, true), board.getSquare("c1").getPiece());
         assertFalse("Expected king to leave c1", board.getSquare("b1").isOccupied());
     }
     
@@ -208,15 +208,15 @@ public class BoardTest {
         whiteRookPlacement.add(new Coordinate("h2"));
         whiteRookPlacement.add(new Coordinate("g3"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        whitePieces.put(Piece.rook(white), whiteRookPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.rook(white, true), whiteRookPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.WHITE;
         
         Board board = new Board(whitePieces, blackPieces, turn);
         
-        Move move = new Move(Piece.rook(white), board.getSquare("g3"), board.getSquare("g1"));
+        Move move = new Move(Piece.rook(white, true), board.getSquare("g3"), board.getSquare("g1"));
         
         board.move(move);
         
@@ -241,20 +241,20 @@ public class BoardTest {
         blackBishopPlacement.add(new Coordinate("a1"));
         blackKingPlacement.add(new Coordinate("b1"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        whitePieces.put(Piece.knight(white), whiteKnightPlacement);
-        blackPieces.put(Piece.bishop(black), blackBishopPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.knight(white, true), whiteKnightPlacement);
+        blackPieces.put(Piece.bishop(black, false), blackBishopPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.WHITE;
         
         Board board = new Board(whitePieces, blackPieces, turn);
         
-        Move move = new Move(Piece.knight(white), board.getSquare("e8"), board.getSquare("g7"));
+        Move move = new Move(Piece.knight(white, true), board.getSquare("e8"), board.getSquare("g7"));
         
         board.move(move);
         
-        assertEquals("Expected Knight to move to g7 to block check", Piece.knight(white), board.getSquare("g7").getPiece());
+        assertEquals("Expected Knight to move to g7 to block check", Piece.knight(white, true), board.getSquare("g7").getPiece());
     }
     
     @Test
@@ -287,20 +287,20 @@ public class BoardTest {
         blackRookPlacement.add(new Coordinate("g7"));
         blackKingPlacement.add(new Coordinate("b1"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        blackPieces.put(Piece.rook(black), blackRookPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        blackPieces.put(Piece.rook(black, true), blackRookPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.BLACK;
         
         Board board = new Board(whitePieces, blackPieces, turn);
         
-        Move move = new Move(Piece.rook(black), board.getSquare("g7"), board.getSquare("a7"));
+        Move move = new Move(Piece.rook(black, true), board.getSquare("g7"), board.getSquare("a7"));
         
         board.move(move);
         
         assertFalse("Expected rook to leave square", board.getSquare("g7").isOccupied());
-        assertEquals("Expected rook to visit a7", Piece.rook(black), board.getSquare("a7").getPiece());
+        assertEquals("Expected rook to visit a7", Piece.rook(black, true), board.getSquare("a7").getPiece());
     }
     
     @Test
@@ -331,7 +331,7 @@ public class BoardTest {
     @Test 
     public void testMoveKnight() {
         PieceColor white = PieceColor.WHITE;
-        Piece knight = Piece.knight(white);
+        Piece knight = Piece.knight(white, false);
         
         Board board = new Board();
         
@@ -355,7 +355,7 @@ public class BoardTest {
         PieceColor color = PieceColor.WHITE;
         Square square = board.getSquare("a1");
         
-        assertEquals("Expected rook on a1", Piece.rook(color), square.getPiece());
+        assertEquals("Expected rook on a1", Piece.rook(color, false), square.getPiece());
     }
     
     @Test
@@ -375,7 +375,7 @@ public class BoardTest {
         PieceColor color = PieceColor.WHITE;
         Square square = board.getSquare("a1");
         
-        Piece queen = Piece.queen(color);
+        Piece queen = Piece.queen(color, true);
         
         square.removePiece();
         square.addPiece(queen);
@@ -391,7 +391,7 @@ public class BoardTest {
         PieceColor color = PieceColor.WHITE;
         Square square = board.getSquare("d4");
         
-        Piece queen = Piece.queen(color);
+        Piece queen = Piece.queen(color, true);
         
         square.addPiece(queen);
         
@@ -434,10 +434,10 @@ public class BoardTest {
         blackBishopPlacement.add(new Coordinate("a1"));
         blackKingPlacement.add(new Coordinate("b1"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        blackPieces.put(Piece.bishop(black), blackBishopPlacement);
-        blackPieces.put(Piece.queen(black), blackQueenPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        blackPieces.put(Piece.bishop(black, false), blackBishopPlacement);
+        blackPieces.put(Piece.queen(black, true), blackQueenPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.WHITE;
         
@@ -465,10 +465,10 @@ public class BoardTest {
         whiteBishopPlacement.add(new Coordinate("a1"));
         blackKingPlacement.add(new Coordinate("b1"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        whitePieces.put(Piece.bishop(white), whiteBishopPlacement);
-        whitePieces.put(Piece.queen(white), whiteQueenPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.bishop(white, false), whiteBishopPlacement);
+        whitePieces.put(Piece.queen(white, true), whiteQueenPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.WHITE;
         
@@ -487,7 +487,7 @@ public class BoardTest {
         
         assertEquals("Expected initial turn to be white", white, board.turn());
         
-        Piece knight = Piece.knight(white);
+        Piece knight = Piece.knight(white, false);
         Square squareFrom1 = board.getSquare("b1");
         Square squareTo1 = board.getSquare("c3");
         Move move1 = new Move(knight, squareFrom1, squareTo1);
@@ -524,10 +524,10 @@ public class BoardTest {
         blackBishopPlacement.add(new Coordinate("a1"));
         blackKingPlacement.add(new Coordinate("b1"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        blackPieces.put(Piece.bishop(black), blackBishopPlacement);
-        blackPieces.put(Piece.queen(black), blackQueenPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        blackPieces.put(Piece.bishop(black, false), blackBishopPlacement);
+        blackPieces.put(Piece.queen(black, true), blackQueenPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.WHITE;
         
@@ -554,10 +554,10 @@ public class BoardTest {
         whiteBishopPlacement.add(new Coordinate("a1"));
         blackKingPlacement.add(new Coordinate("b1"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        blackPieces.put(Piece.bishop(white), whiteBishopPlacement);
-        blackPieces.put(Piece.queen(white), whiteQueenPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        blackPieces.put(Piece.bishop(white, false), whiteBishopPlacement);
+        blackPieces.put(Piece.queen(white, true), whiteQueenPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.BLACK;
         
@@ -582,9 +582,9 @@ public class BoardTest {
         whiteQueenPlacement.add(new Coordinate("b1"));
         blackKingPlacement.add(new Coordinate("a1"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        whitePieces.put(Piece.queen(white), whiteQueenPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.queen(white, true), whiteQueenPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
         
         PieceColor turn = PieceColor.BLACK;
         
@@ -592,7 +592,7 @@ public class BoardTest {
         
         assertEquals("Expected only 1 legal move", 1, board.legalMoves().size());
         
-        Move move = new Move(Piece.king(black), board.getSquare("a1"), board.getSquare("b1"));
+        Move move = new Move(Piece.king(black, true), board.getSquare("a1"), board.getSquare("b1"));
     
         assertTrue("Expected only move to be to capture queen", board.legalMoves().contains(move));
     }
@@ -636,11 +636,11 @@ public class BoardTest {
         blackBishopPlacement.add(new Coordinate("g8"));
         blackPawnPlacement.add(new Coordinate("h7"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        whitePieces.put(Piece.bishop(white), whiteBishopPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
-        blackPieces.put(Piece.queen(black), blackQueenPlacement);
-        blackPieces.put(Piece.bishop(black), blackBishopPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.bishop(white, false), whiteBishopPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.queen(black, true), blackQueenPlacement);
+        blackPieces.put(Piece.bishop(black, false), blackBishopPlacement);
         blackPieces.put(Piece.pawn(black, false), blackPawnPlacement);
         
         PieceColor turn = PieceColor.BLACK;
@@ -651,9 +651,9 @@ public class BoardTest {
         
         assertEquals("Expected 3 ways to block with queen", 3, legalMoves.size());
     
-        Move move1 = new Move(Piece.queen(black), board.getSquare("c7"), board.getSquare("g7"));
-        Move move2 = new Move(Piece.queen(black), board.getSquare("c7"), board.getSquare("e5"));
-        Move move3 = new Move(Piece.queen(black), board.getSquare("c7"), board.getSquare("c3"));
+        Move move1 = new Move(Piece.queen(black, true), board.getSquare("c7"), board.getSquare("g7"));
+        Move move2 = new Move(Piece.queen(black, true), board.getSquare("c7"), board.getSquare("e5"));
+        Move move3 = new Move(Piece.queen(black, true), board.getSquare("c7"), board.getSquare("c3"));
         
         Set<Move> expectedLegalMoves = new HashSet<>();
         expectedLegalMoves.add(move1);
@@ -708,10 +708,10 @@ public class BoardTest {
         blackKingPlacement.add(new Coordinate("h8"));
         blackKnightPlacement.add(new Coordinate("g7"));
         
-        whitePieces.put(Piece.king(white), whiteKingPlacement);
-        whitePieces.put(Piece.queen(white), whiteQueenPlacement);
-        blackPieces.put(Piece.king(black), blackKingPlacement);
-        blackPieces.put(Piece.knight(black), blackKnightPlacement);
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.queen(white, true), whiteQueenPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
         
         PieceColor turn = PieceColor.BLACK;
         
@@ -719,8 +719,8 @@ public class BoardTest {
         
         assertEquals("Expected only 2 legal moves for black", 2, board.legalMoves().size());
         
-        Move move1 = new Move(Piece.king(black), board.getSquare("h8"), board.getSquare("h7"));
-        Move move2 = new Move(Piece.king(black), board.getSquare("h8"), board.getSquare("g8"));
+        Move move1 = new Move(Piece.king(black, true), board.getSquare("h8"), board.getSquare("h7"));
+        Move move2 = new Move(Piece.king(black, true), board.getSquare("h8"), board.getSquare("g8"));
 
         assertTrue("Expected Kh7 legal move", board.legalMoves().contains(move1));
         assertTrue("Expected Kg8 legal move", board.legalMoves().contains(move2));

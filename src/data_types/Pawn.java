@@ -73,6 +73,7 @@ public class Pawn implements Piece {
      * Check if this pawn has moved or not
      * @return true if this pawn has moved
      */
+    @Override
     public boolean moved() {
         return moved;
     }
@@ -94,7 +95,12 @@ public class Pawn implements Piece {
         Pawn otherPawn = (Pawn) other; 
         
         // considered equivalent if they have an equivalent moveSet when placed on d4
-        return this.moveSet(D4_COORDINATE).equals(otherPawn.moveSet(D4_COORDINATE)) && this.color().equals(otherPawn.color());
+        boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherPawn.moveSet(D4_COORDINATE));
+        boolean colorSame = this.color().equals(otherPawn.color());
+        boolean movedSame = this.moved() == otherPawn.moved();
+        
+        // considered equivalent if they have an equivalent moveSet when placed on d4
+        return  moveSetSame && colorSame && movedSame;
     }
         
     @Override

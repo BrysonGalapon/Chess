@@ -9,6 +9,7 @@ import java.util.Set;
  */
 public class King implements Piece {
     private final PieceColor color;
+    private final boolean moved;
     
     private static final Coordinate D4_COORDINATE = new Coordinate(3, 3);
     
@@ -28,8 +29,10 @@ public class King implements Piece {
      * Create a new King
      * @param color of this King
      */
-    public King(PieceColor color) {
+    public King(PieceColor color, boolean moved) {
         this.color = color;
+        this.moved = moved;
+        checkRep();
     }
     
     /**
@@ -83,8 +86,12 @@ public class King implements Piece {
         
         King otherKing = (King) other; 
         
+        boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherKing.moveSet(D4_COORDINATE));
+        boolean colorSame = this.color().equals(otherKing.color());
+        boolean movedSame = this.moved() == otherKing.moved();
+        
         // considered equivalent if they have an equivalent moveSet when placed on d4
-        return this.moveSet(D4_COORDINATE).equals(otherKing.moveSet(D4_COORDINATE)) && this.color().equals(otherKing.color());
+        return  moveSetSame && colorSame && movedSame;
     }
         
     @Override
@@ -100,6 +107,11 @@ public class King implements Piece {
     @Override
     public boolean isPawn() {
         return false;
+    }
+
+    @Override
+    public boolean moved() {
+        return moved;
     }
 }
 

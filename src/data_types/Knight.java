@@ -11,6 +11,7 @@ import java.util.Set;
  */
 public class Knight implements Piece {
     private final PieceColor color;
+    private final boolean moved;
     
     private static final Coordinate D4_COORDINATE = new Coordinate(3, 3);
     
@@ -30,8 +31,10 @@ public class Knight implements Piece {
      * Create a new Knight
      * @param color of this Knight
      */
-    public Knight(PieceColor color) {
+    public Knight(PieceColor color, boolean moved) {
         this.color = color;
+        this.moved = moved;
+        checkRep();
     }
     
     /** 
@@ -97,8 +100,12 @@ public class Knight implements Piece {
         
         Knight otherKnight = (Knight) other; 
         
+        boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherKnight.moveSet(D4_COORDINATE));
+        boolean colorSame = this.color().equals(otherKnight.color());
+        boolean movedSame = this.moved() == otherKnight.moved();
+        
         // considered equivalent if they have an equivalent moveSet when placed on d4
-        return this.moveSet(D4_COORDINATE).equals(otherKnight.moveSet(D4_COORDINATE)) && this.color().equals(otherKnight.color());
+        return  moveSetSame && colorSame && movedSame;
     }
         
     @Override
@@ -114,5 +121,10 @@ public class Knight implements Piece {
     @Override
     public boolean isPawn() {
         return false;
+    }
+
+    @Override
+    public boolean moved() {
+        return moved;
     }
 }
