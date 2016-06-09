@@ -150,13 +150,50 @@ public class BoardTest {
     // 
     // lastMove:
     //  - last move was the first move in the game, last move was not the first move in the game
+    //  - last move was white's last move, last move was black's last move
     // 
-    
-    // TODO: Write tests for lastMove
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testLastMoveInit() {
+        Board board = new Board();
+        Move lastMove = board.getLastMove();
+        
+        assertTrue("Expected null initial first move", lastMove == null);
+    }
+    
+    @Test
+    public void testLastMoveWhite() {
+        Board board = new Board();
+        Set<Move> legalMovesWhite = board.legalMoves();
+        
+        Move firstMove = getArbitrary(legalMovesWhite);
+        
+        board.move(firstMove);
+        
+        Move lastMove = board.getLastMove();
+        
+        assertEquals("Expected last move to be the first move", firstMove, lastMove);
+    }
+    
+    @Test
+    public void testLastMoveBlack() {
+        Board board = new Board();
+        Move firstMove = getArbitrary(board.legalMoves());
+        
+        board.move(firstMove);
+        
+        Move secondMove = getArbitrary(board.legalMoves());
+        
+        board.move(secondMove);
+        
+        Move lastMove = board.getLastMove();
+        
+        assertEquals("Expected last move to be the second move", secondMove, lastMove);
     }
     
     @Test
@@ -758,5 +795,24 @@ public class BoardTest {
         
         assertEquals(expectedString, board.toString());
 
+    }
+    
+    /**
+     * Retrieve an arbitrary element out of a set
+     * @param set Set of elements to remove from
+     * @return any element contained in set
+     */
+    private <T> T getArbitrary(Set<T> set) {
+        if (set.size() == 0) {
+            throw new RuntimeException("Can not remove an arbitrary element out of empty set");
+        }
+        
+        T arbitraryItem = null;
+        
+        for (T item : set) {
+            arbitraryItem = item;
+        }
+        
+        return arbitraryItem;
     }
 }

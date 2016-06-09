@@ -137,6 +137,7 @@ public class Board {
             throw new IllegalArgumentException("Move is illegal");
         }
         
+        this.lastMove = chessMove;
         changeTurn();
         checkRep();
     }
