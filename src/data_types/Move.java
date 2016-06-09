@@ -6,122 +6,86 @@ import java.util.Set;
  * Represents a Chess Move. This class is immutable.
  * @author Bryson
  */
-public class Move {
-    private final Piece piece;
-    private final Square squareFrom;
-    private final Square squareTo;
+public interface Move {
     
-    // Abstraction Function:
-    //  - represents the move of piece piece form square squareFrom to 
-    //        square squareTo on a chess board
-    // 
-    // Rep Invariant:
-    //  - moving the piece from squareFrom to squareTo is a valid chess move
-    // 
-    // Safety From Rep Exposure:
-    //  - all fields are private and final
-    //  - all mutable inputs are defensively copied
-    //  - all mutable outputs are defensively copied
-    // 
+    // Data-type Definition:
+    // Move = Normal(piece:Piece, coordFrom:Coordinate, coordTo:Coordinate) + Castle(turnSide:PieceColor, castleSide:CastleSide)
     
     /**
-     * Create a new Move object
-     * @param piece Piece to move
-     * @param squareFrom square to move this piece from
-     * @param squareTo square to move this piece to
+     * Create a new move 
+     * @param squareFrom square that the current player clicked first
+     * @param sqaureTo square that the current player clicked last
+     * @return a Move object that represents the move that the current player made 
      */
-    public Move(Piece piece, Square squareFrom, Square squareTo) {
-        this.piece = piece;
-        this.squareFrom = new Square(squareFrom.squareCoordinate());
-        this.squareTo = new Square(squareTo.squareCoordinate());
+    public static Move createMove(Square squareFrom, Square squareTo) {
+        Piece movedPiece = squareFrom.getPiece();
         
-        if (squareFrom.isOccupied()) {
-            this.squareFrom.addPiece(squareFrom.getPiece());
-        } 
+        Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
+        Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
         
-        if (squareTo.isOccupied()) {
-            this.squareTo.addPiece(squareTo.getPiece());
-        } 
+        Coordinate coordFrom = squareFrom.squareCoordinate();
+        Coordinate coordTo = squareTo.squareCoordinate();
+        boolean pieceMovedTwoSquares = Math.abs(coordFrom.getX() - coordTo.getX()) == 2;
         
-        checkRep();
-    }
-    
-    /**
-     * Assert the Rep Invariant
-     */
-    private void checkRep() {
-        Coordinate source = squareFrom.squareCoordinate();
-        Coordinate target = squareTo.squareCoordinate();
-        
-        Set<Coordinate> validTargets = piece.moveSet(source);
-        
-        assert validTargets.contains(target);
-    }
-    
-    /**
-     * Retrieve the piece that is being moved
-     * @return the piece that is being moved
-     */
-    public Piece getPiece() {
-        return piece;
-    }
-    
-    /**
-     * Retrieve the square that this piece is being moved from
-     * @return the square that this piece is being moved from
-     */
-    public Square squareFrom() {
-        Square squareFromCopy = new Square(squareFrom.squareCoordinate()); 
-        if (squareFrom.isOccupied()) {
-            squareFromCopy.addPiece(squareFrom.getPiece());
+        if ((movedPiece.equals(unmovedWhiteKing) || movedPiece.equals(unmovedBlackKing)) && pieceMovedTwoSquares) {
+            // if the king lands on g1, then we castle kingside. Otherwise, we castle queenside.
+            CastleSide castleSide = (coordTo.equals(new Coordinate("g1"))) ? CastleSide.KINGSIDE : CastleSide.QUEENSIDE;
+            return new Castle(movedPiece.color(), castleSide);
+        } else {
+            return new Normal(movedPiece, coordFrom, coordTo);
         }
-        
-        checkRep();
-        return squareFromCopy;
     }
     
     /**
-     * Retrieve the square that this piece is being moved to
-     * @return the square that this piece is being moved to
+     * Retrieve the pieces that moved
+     * @return the set of pieces that move on this move
      */
-    public Square squareTo() {
-        Square squareToCopy = new Square(squareTo.squareCoordinate()); 
-        if (squareTo.isOccupied()) {
-            squareToCopy.addPiece(squareTo.getPiece());
-        }
-        
-        checkRep();
-        return squareToCopy;
-    }
+    public Set<Piece> movedPieces();
+    
+    /**
+     * Retrieve the coordinate of the square that the current player
+     * has to click on first to make this move 
+     * @return the coordinate of the square that the current player
+     *          has to click on first to make this move
+     */
+    public Coordinate coordFrom();
+    
+    /**
+     * Retrieve the coordinate of the square that the current player
+     * has to click on last to make this move
+     * @return the coordinate of the square that the current player
+     *          has to click on last to make this move
+     */
+    public Coordinate coordTo();
+    
+    /**
+     * Retrieve the set of coordinates on the chess board for which
+     * the pieces at these coordinates change
+     * @return the set of coordinates on the chess board for which
+     *          the pieces at these coordinates change
+     */
+    public Set<Coordinate> coordinatesChanged();
+    
+    /**
+     * Check if this move is a castling move
+     * @return true if and only if this move is a castling move
+     */
+    public boolean isCastle();
     
     /**
      * Retrieve the string representation of this move
-     * @return a string in the form "P: s1 -> s2", 
+     * @return a string in the form "P: c1 -> c2", 
      * 
      *         where P is the piece in chess notation being moved,
-     *               s1 is the square that this piece is being moved from
-     *               s2 is the square that this piece is being moved to
+     *               c1 is the coordinate that this piece is being moved from
+     *               c2 is the coordinate that this piece is being moved to
      */
     @Override
-    public String toString() {
-        return piece + ": " + squareFrom + " -> " + squareTo;
-    }
+    public String toString();
     
     @Override
-    public boolean equals(Object other) {
-        if (! (other instanceof Move)) {return false;}
-        
-        Move otherMove = (Move) other;
-        
-        boolean pieceEquivalent = this.getPiece().equals(otherMove.getPiece());
-        boolean squareToEquivalent = this.squareTo().equals(otherMove.squareTo());
-        boolean squareFromEquivalent = this.squareTo().equals(otherMove.squareTo());
-        
-        return pieceEquivalent && squareToEquivalent && squareFromEquivalent;
-    }
+    public boolean equals(Object other);
     
     @Override
-    public int hashCode() {
-        return piece.hashCode();
-    }
+    public int hashCode();
 }

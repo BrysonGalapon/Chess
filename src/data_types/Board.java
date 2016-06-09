@@ -118,8 +118,8 @@ public class Board {
      * @throws IllegalArgumentException if this move is illegal
      */
     public void move(Move chessMove) throws IllegalArgumentException{
-        Square squareFrom = chessMove.squareFrom();
-        Piece pieceToMove = chessMove.getPiece();
+        Square squareFrom = getSquare(chessMove.coordFrom());
+        Piece pieceToMove = squareFrom.getPiece();
         
         Square squareSource = getSquare(squareFrom.squareCoordinate());
         
@@ -253,9 +253,9 @@ public class Board {
                         boolean isCaptureMove = coordTo.getX() != coordFrom.getX();
                         Move lastMove = getLastMove();
                         if (lastMove != null) {
-                            Piece lastMovePiece = lastMove.getPiece();
-                            Coordinate lastMoveCoordFrom = lastMove.squareFrom().squareCoordinate();
-                            Coordinate lastMoveCoordTo = lastMove.squareTo().squareCoordinate();
+                            Piece lastMovePiece = getSquare(lastMove.coordFrom()).getPiece();
+                            Coordinate lastMoveCoordFrom = lastMove.coordFrom();
+                            Coordinate lastMoveCoordTo = lastMove.coordTo();
                             boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && lastMoveCoordFrom.getY()+2 == lastMoveCoordTo.getY();
                             boolean pawnHadPushedAdjacentFile = lastMoveCoordFrom.getX() == coordTo.getX();
                             boolean pawnCanCapture = coordInBetween(lastMoveCoordFrom, lastMoveCoordTo).contains(coordTo);
@@ -270,7 +270,7 @@ public class Board {
                             continue;
                         }
                         
-                        legalMoves.add(new Move(piece, getSquare(coordFrom), getSquare(coordTo)));
+                        legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
                     }
                 }
             } else {
@@ -309,7 +309,7 @@ public class Board {
                         }
                         
                         if (isValidMove) {
-                            legalMoves.add(new Move(piece, getSquare(coordFrom), getSquare(coordTo)));
+                            legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
                         }
                     }
                 }
@@ -519,12 +519,20 @@ public class Board {
         }
     }
     
+    /**
+     * Filter out the moves that would result in an illegal position via landing in check
+     * @param moveSet set of moves to filter for checks
+     * @return the moves in moveSet that don't result in an illegal position via check
+     */
     private Set<Move> filterChecks(Set<Move> moveSet) {
         Set<Move> filteredMoves = new HashSet<Move>();
         for (Move move : moveSet) {
-            Piece pieceBeingTaken = new EmptyPiece();
-            if (move.squareTo().isOccupied())
-                pieceBeingTaken = move.squareTo().getPiece();
+            
+            // save the state of squares that will be changed
+            Set<Square> squareState = new HashSet<>();
+            for (Coordinate coord : move.coordinatesChanged()) {
+                squareState.add(getSquare(coord));
+            }
             
             movePiece(move);
             
@@ -532,7 +540,7 @@ public class Board {
                 filteredMoves.add(move);
             }
             
-            takeBackMove(move, pieceBeingTaken);
+            restoreBoard(squareState);
         }
         
         return filteredMoves;
@@ -543,9 +551,9 @@ public class Board {
      * @param move move to make on this board
      */
     private void movePiece(Move move) {
-        Square squareFrom = getSquare(move.squareFrom().squareCoordinate());
-        Square squareTo = getSquare(move.squareTo().squareCoordinate());
-        Piece pieceToMove = move.getPiece();
+        Square squareFrom = getSquare(move.coordFrom());
+        Square squareTo = getSquare(move.coordTo());
+        Piece pieceToMove = squareFrom.getPiece();
         
         if (!squareFrom.isOccupied()) {
             throw new RuntimeException("No piece is there to move");
@@ -566,38 +574,13 @@ public class Board {
     }
     
     /**
-     * Take back a move
-     *  - requires that move has been the last move that was played
-     * @param move move to be taken back
-     * @param piece piece that may have been taken on the move move
+     * Restore the board to an initial state
+     * @param squareState set of original squares to restore
      */
-    private void takeBackMove(Move move, Piece piece) {
-        Square squareFrom = getSquare(move.squareFrom().squareCoordinate());
-        Square squareTo = getSquare(move.squareTo().squareCoordinate());
-        Piece pieceToMove = move.getPiece();
-        
-        if (!squareTo.isOccupied()) {
-            throw new RuntimeException("Can't find the piece to move back");
+    private void restoreBoard(Set<Square> squareState) {
+        for(Square square : squareState) {
+            grid[square.squareCoordinate().getX()][square.squareCoordinate().getY()] = square;
         }
-        
-        
-        if (!squareTo.getPiece().equals(pieceToMove)) {
-            if (!pieceToMove.isPawn() || !squareTo.getPiece().isPawn())
-                throw new RuntimeException("Can't find the piece to move back");
-        }
-        
-        squareTo.removePiece();
-        squareFrom.addPiece(pieceToMove);
-        
-        if (piece.exists()) {
-            squareTo.addPiece(piece);
-        }
-        
-        Coordinate coordFrom = squareFrom.squareCoordinate();
-        Coordinate coordTo = squareTo.squareCoordinate();
-        
-        grid[coordFrom.getX()][coordFrom.getY()] = squareFrom;
-        grid[coordTo.getX()][coordTo.getY()] = squareTo;
     }
     
     /**

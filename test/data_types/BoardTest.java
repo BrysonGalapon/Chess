@@ -220,7 +220,7 @@ public class BoardTest {
         
         Board board = new Board(whitePieces, blackPieces, turn);
         
-        Move move = new Move(Piece.king(black, true), board.getSquare("b1"), board.getSquare("c1"));
+        Move move = Move.createMove(board.getSquare("b1"), board.getSquare("c1"));
         
         board.move(move);
         
@@ -253,7 +253,7 @@ public class BoardTest {
         
         Board board = new Board(whitePieces, blackPieces, turn);
         
-        Move move = new Move(Piece.rook(white, true), board.getSquare("g3"), board.getSquare("g1"));
+        Move move = Move.createMove(board.getSquare("g3"), board.getSquare("g1"));
         
         board.move(move);
         
@@ -287,7 +287,7 @@ public class BoardTest {
         
         Board board = new Board(whitePieces, blackPieces, turn);
         
-        Move move = new Move(Piece.knight(white, true), board.getSquare("e8"), board.getSquare("g7"));
+        Move move = Move.createMove(board.getSquare("e8"), board.getSquare("g7"));
         
         board.move(move);
         
@@ -299,9 +299,7 @@ public class BoardTest {
         Board board = new Board();
         PieceColor white = PieceColor.WHITE;
         
-        Piece pawn = board.getSquare("d2").getPiece();
-        
-        Move move = new Move(pawn, board.getSquare("d2"), board.getSquare("d3"));
+        Move move = Move.createMove(board.getSquare("d2"), board.getSquare("d3"));
         
         board.move(move);
         
@@ -332,7 +330,7 @@ public class BoardTest {
         
         Board board = new Board(whitePieces, blackPieces, turn);
         
-        Move move = new Move(Piece.rook(black, true), board.getSquare("g7"), board.getSquare("a7"));
+        Move move = Move.createMove(board.getSquare("g7"), board.getSquare("a7"));
         
         board.move(move);
         
@@ -352,7 +350,7 @@ public class BoardTest {
         
         assertFalse("Expected unmoved pawn to be unmoved", unmovedPawn.moved());
         
-        Move firstMove = new Move(unmovedPawn, board.getSquare("e2"), board.getSquare("e4"));
+        Move firstMove = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
         
         board.move(firstMove);
         
@@ -375,7 +373,7 @@ public class BoardTest {
         Square squareFrom = board.getSquare("b1");
         Square squareTo = board.getSquare("c3");
         
-        Move move = new Move(knight, squareFrom, squareTo);
+        Move move = Move.createMove(squareFrom, squareTo);
         
         board.move(move);
         
@@ -524,10 +522,9 @@ public class BoardTest {
         
         assertEquals("Expected initial turn to be white", white, board.turn());
         
-        Piece knight = Piece.knight(white, false);
         Square squareFrom1 = board.getSquare("b1");
         Square squareTo1 = board.getSquare("c3");
-        Move move1 = new Move(knight, squareFrom1, squareTo1);
+        Move move1 = Move.createMove(squareFrom1, squareTo1);
         
         board.move(move1);
         
@@ -535,8 +532,7 @@ public class BoardTest {
         
         Square squareFrom2 = board.getSquare("f7");
         Square squareTo2 = board.getSquare("f5");
-        Piece pawn = squareFrom2.getPiece();
-        Move move2 = new Move(pawn, squareFrom2, squareTo2);
+        Move move2 = Move.createMove(squareFrom2, squareTo2);
         
         board.move(move2);
         
@@ -629,7 +625,7 @@ public class BoardTest {
         
         assertEquals("Expected only 1 legal move", 1, board.legalMoves().size());
         
-        Move move = new Move(Piece.king(black, true), board.getSquare("a1"), board.getSquare("b1"));
+        Move move = Move.createMove(board.getSquare("a1"), board.getSquare("b1"));
     
         assertTrue("Expected only move to be to capture queen", board.legalMoves().contains(move));
     }
@@ -688,9 +684,9 @@ public class BoardTest {
         
         assertEquals("Expected 3 ways to block with queen", 3, legalMoves.size());
     
-        Move move1 = new Move(Piece.queen(black, true), board.getSquare("c7"), board.getSquare("g7"));
-        Move move2 = new Move(Piece.queen(black, true), board.getSquare("c7"), board.getSquare("e5"));
-        Move move3 = new Move(Piece.queen(black, true), board.getSquare("c7"), board.getSquare("c3"));
+        Move move1 = Move.createMove(board.getSquare("c7"), board.getSquare("g7"));
+        Move move2 = Move.createMove(board.getSquare("c7"), board.getSquare("e5"));
+        Move move3 = Move.createMove(board.getSquare("c7"), board.getSquare("c3"));
         
         Set<Move> expectedLegalMoves = new HashSet<>();
         expectedLegalMoves.add(move1);
@@ -704,12 +700,11 @@ public class BoardTest {
     public void testPawnCapture() {
         Board board = new Board();
         
-        Move move1 = new Move(Piece.pawn(PieceColor.WHITE, false), board.getSquare("e2"), board.getSquare("e4"));
+        Move move1 = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
         board.move(move1);
-        Move move2 = new Move(Piece.pawn(PieceColor.BLACK, false), board.getSquare("d7"), board.getSquare("d5"));
+        Move move2 = Move.createMove(board.getSquare("d7"), board.getSquare("d5"));
         board.move(move2);
-        
-        Move move3 = new Move(Piece.pawn(PieceColor.WHITE, true), board.getSquare("e4"), board.getSquare("d5"));
+        Move move3 = Move.createMove(board.getSquare("e4"), board.getSquare("d5"));
         board.move(move3);
         
         String expectedString = "r n b q k b n r \n" +
@@ -720,9 +715,6 @@ public class BoardTest {
                                 "- - - - - - - - \n" + 
                                 "P P P P - P P P \n" + 
                                 "R N B Q K B N R \n";
-        
-        Square squareFrom = board.getSquare("e4");
-        Square squareTo = board.getSquare("d5");
         
         assertEquals("Expected pawn captures to be allowable", expectedString, board.toString());
     }
@@ -756,8 +748,8 @@ public class BoardTest {
         
         assertEquals("Expected only 2 legal moves for black", 2, board.legalMoves().size());
         
-        Move move1 = new Move(Piece.king(black, true), board.getSquare("h8"), board.getSquare("h7"));
-        Move move2 = new Move(Piece.king(black, true), board.getSquare("h8"), board.getSquare("g8"));
+        Move move1 = Move.createMove(board.getSquare("h8"), board.getSquare("h7"));
+        Move move2 = Move.createMove(board.getSquare("h8"), board.getSquare("g8"));
 
         assertTrue("Expected Kh7 legal move", board.legalMoves().contains(move1));
         assertTrue("Expected Kg8 legal move", board.legalMoves().contains(move2));
@@ -781,7 +773,7 @@ public class BoardTest {
     @Test
     public void testToStringMove() {
         Board board = new Board();
-        Move move = new Move(Piece.pawn(PieceColor.WHITE, false), board.getSquare("e2"), board.getSquare("e4"));
+        Move move = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
         board.move(move);
         
         String expectedString = "r n b q k b n r \n" +
