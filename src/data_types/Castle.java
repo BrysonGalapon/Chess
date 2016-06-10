@@ -84,8 +84,8 @@ public class Castle implements Move{
         int rookY = (turnSide.equals(PieceColor.WHITE)) ? 0 : Board.DEFAULT_SIZE-1; 
         int rookFromX = (castleSide.equals(CastleSide.KINGSIDE)) ? Board.DEFAULT_SIZE-1 : 0; // 0-indexed y-placement of king
                                                                                              // either the first rank if white, or eigth rank if black
-        int rookToX = (castleSide.equals(CastleSide.KINGSIDE)) ? 6 : 2; // 0-indexed x-placement of king  
-                                                                        // either the g file if kingside, or the c file if queenside
+        int rookToX = (castleSide.equals(CastleSide.KINGSIDE)) ? 5 : 3; // 0-indexed x-placement of rook  
+                                                                        // either the f file if kingside, or the d file if queenside
         
         coordsChanged.add(coordFrom());
         coordsChanged.add(coordTo());

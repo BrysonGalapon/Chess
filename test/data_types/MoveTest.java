@@ -30,11 +30,43 @@ public class MoveTest {
     //  - move is a pawn move, move is not a pawn move
     // 
     
-    // TODO: Add tests for coordinatesChanged
-    
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testCoordinatesChangedCastle() {
+        Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
+        Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
+        
+        Square squareFromWhite = new Square(new Coordinate("e1"));
+        Square squareFromBlack = new Square(new Coordinate("e8"));
+        
+        Square squareToWhite = new Square(new Coordinate("g1"));
+        Square squareToBlack = new Square(new Coordinate("c8"));
+        
+        squareFromWhite.addPiece(unmovedWhiteKing);
+        squareFromBlack.addPiece(unmovedBlackKing);
+        
+        Move whiteCastleKingside = Move.createMove(squareFromWhite, squareToWhite);
+        Move blackCastleQueenside = Move.createMove(squareFromBlack, squareToBlack);
+        
+        Set<Coordinate> expectedCoordinatesChangedWhite = new HashSet<>();
+        Set<Coordinate> expectedCoordinatesChangedBlack = new HashSet<>();
+        
+        expectedCoordinatesChangedWhite.add(new Coordinate("e1"));
+        expectedCoordinatesChangedWhite.add(new Coordinate("g1"));
+        expectedCoordinatesChangedWhite.add(new Coordinate("h1"));
+        expectedCoordinatesChangedWhite.add(new Coordinate("f1"));
+
+        expectedCoordinatesChangedBlack.add(new Coordinate("e8"));
+        expectedCoordinatesChangedBlack.add(new Coordinate("c8"));
+        expectedCoordinatesChangedBlack.add(new Coordinate("a8"));
+        expectedCoordinatesChangedBlack.add(new Coordinate("d8"));
+
+        assertEquals("Expected correct changed coordinates for white castling kingside", expectedCoordinatesChangedWhite, whiteCastleKingside.coordinatesChanged());
+        assertEquals("Expected correct changed coordinates for black castling queenside", expectedCoordinatesChangedBlack, blackCastleQueenside.coordinatesChanged());
     }
     
     @Test

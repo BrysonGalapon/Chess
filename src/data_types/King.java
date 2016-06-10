@@ -56,6 +56,16 @@ public class King implements Piece {
             }
         }
         
+        if (!moved()) {
+            if (coord.equals(new Coordinate("e1")) && color().equals(PieceColor.WHITE)) {
+                moves.add(new Coordinate("g1"));
+                moves.add(new Coordinate("c1"));
+            } else if (coord.equals(new Coordinate("e8")) && color().equals(PieceColor.BLACK)) {
+                moves.add(new Coordinate("g8"));
+                moves.add(new Coordinate("c8"));
+            }
+        }
+        
         checkRep();
         return moves;
     }

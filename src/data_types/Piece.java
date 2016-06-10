@@ -57,8 +57,9 @@ public interface Piece {
      */
     public boolean moved();
     
-    /** Retrieve the move set of a particular chess piece on an empty board, including 
-     *      capture moves, when placed on coord
+    /** Retrieve the set of coordinates a particular chess piece can land on 
+     *      on an empty board, including capture and castling moves, 
+     *      when placed on coord.
      * @param coord coordinate to have 'placed' the piece
      * @return a set of coordinate indicating the set of coordinates this piece
      *          can move to on an empty board

@@ -23,6 +23,7 @@ public class PieceTest {
     //    - king is in the corner, king is not in the corner
     //    - king is on the edge, king is not on the edge
     //    - king is in the center, king is not in the center
+    //    - king is unmoved and can castle
     //
     //  - knight:
     //    - knight is in the corner, knight is not in the corner
@@ -72,12 +73,78 @@ public class PieceTest {
     //  - piece is a queen, piece is not a queen
     //  - piece is empty, piece is not empty
     // 
-    
-    // TODO write tests for moved()    
+    // moved: 
+    //  - piece is a pawn, piece is not a pawn
+    //  - piece has moved, piece has not moved
+    // 
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testMovedMovedPawn() {
+        Piece pawn = Piece.pawn(PieceColor.WHITE, true);
+        assertTrue("Expected moved pawn to have moved", pawn.moved());
+    }
+    
+    @Test
+    public void testMovedUnmovedKnight() {
+        Piece knight = Piece.knight(PieceColor.BLACK, false);
+        assertFalse("Expected unmoved knight to have not moved", knight.moved());
+    }
+    
+    @Test
+    public void testCastlingKingWhite() {
+        PieceColor color = PieceColor.WHITE;
+        Piece unmovedKing = Piece.king(color, false);
+        Piece movedKing = Piece.king(color, true);
+        
+        Set<Coordinate> expectedUnmovedWhiteKingCoords = new HashSet<>();
+        expectedUnmovedWhiteKingCoords.add(new Coordinate("d1"));
+        expectedUnmovedWhiteKingCoords.add(new Coordinate("d2"));
+        expectedUnmovedWhiteKingCoords.add(new Coordinate("e2"));
+        expectedUnmovedWhiteKingCoords.add(new Coordinate("f2"));
+        expectedUnmovedWhiteKingCoords.add(new Coordinate("f1"));
+        expectedUnmovedWhiteKingCoords.add(new Coordinate("g1"));
+        expectedUnmovedWhiteKingCoords.add(new Coordinate("c1"));
+        
+        Set<Coordinate> expectedMovedWhiteKingCoords = new HashSet<>();
+        expectedMovedWhiteKingCoords.add(new Coordinate("d1"));
+        expectedMovedWhiteKingCoords.add(new Coordinate("d2"));
+        expectedMovedWhiteKingCoords.add(new Coordinate("e2"));
+        expectedMovedWhiteKingCoords.add(new Coordinate("f2"));
+        expectedMovedWhiteKingCoords.add(new Coordinate("f1"));
+        
+        assertEquals("Expected correct move set for unmoved king on e1", expectedUnmovedWhiteKingCoords, unmovedKing.moveSet(new Coordinate("e1")));
+        assertEquals("Expected correct move set for moved king on e1", expectedMovedWhiteKingCoords, movedKing.moveSet(new Coordinate("e1")));
+    }
+    
+    @Test
+    public void testCastlingKingBlack() {
+        PieceColor color = PieceColor.BLACK;
+        Piece unmovedKing = Piece.king(color, false);
+        Piece movedKing = Piece.king(color, true);
+        
+        Set<Coordinate> expectedUnmovedBlackKingCoords = new HashSet<>();
+        expectedUnmovedBlackKingCoords.add(new Coordinate("d8"));
+        expectedUnmovedBlackKingCoords.add(new Coordinate("d7"));
+        expectedUnmovedBlackKingCoords.add(new Coordinate("e7"));
+        expectedUnmovedBlackKingCoords.add(new Coordinate("f7"));
+        expectedUnmovedBlackKingCoords.add(new Coordinate("f8"));
+        expectedUnmovedBlackKingCoords.add(new Coordinate("g8"));
+        expectedUnmovedBlackKingCoords.add(new Coordinate("c8"));
+        
+        Set<Coordinate> expectedMovedBlackKingCoords = new HashSet<>();
+        expectedMovedBlackKingCoords.add(new Coordinate("d8"));
+        expectedMovedBlackKingCoords.add(new Coordinate("d7"));
+        expectedMovedBlackKingCoords.add(new Coordinate("e7"));
+        expectedMovedBlackKingCoords.add(new Coordinate("f7"));
+        expectedMovedBlackKingCoords.add(new Coordinate("f8"));
+        
+        assertEquals("Expected correct move set for unmoved king on e8", expectedUnmovedBlackKingCoords, unmovedKing.moveSet(new Coordinate("e8")));
+        assertEquals("Expected correct move set for moved king on e8", expectedMovedBlackKingCoords, movedKing.moveSet(new Coordinate("e8")));
     }
     
     @Test

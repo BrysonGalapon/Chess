@@ -124,6 +124,8 @@ public class BoardTest {
     //  - move is a capture, move is not a capture
     //  - move results in checkmate, move doesn't result in checkmate
     //  - move blocks a check, move does not block a check
+    //  - move is a promotion, move is not a promotion
+    //  - move is a castle move, move is not a castle move
     // 
     // blackPieces:
     //  - number of black pieces is 1, number of black pieces is > 1
@@ -138,6 +140,8 @@ public class BoardTest {
     //  - #legal moves is 1, #legal moves is > 1
     //  - position is in check, position is not in check
     //  - position has a piece that's pinned, position doesn't have a piece that's pinned
+    //  - current player can castle kingside, current player can not castle kingside
+    //  - current player can castle queenside, current player can not castle queenside
     // 
     // checkMate:
     //  - position is checkmate, position is not checkmate
@@ -156,6 +160,251 @@ public class BoardTest {
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testLegalMovesCastleKingMoved() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteRookPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e1"));
+        blackKingPlacement.add(new Coordinate("e8"));
+        whiteRookPlacement.add(new Coordinate("h1"));
+        whiteRookPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("b2"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.rook(white, false), whiteRookPlacement);
+        blackPieces.put(Piece.king(black, false), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        assertEquals("Expected 24 legal moves for white, including castling", 24, board.legalMoves().size());
+    }
+    
+    @Test
+    public void testLegalMovesCastleRookMoved() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteRookPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e1"));
+        blackKingPlacement.add(new Coordinate("e8"));
+        whiteRookPlacement.add(new Coordinate("h1"));
+        whiteRookPlacement.add(new Coordinate("a1"));
+        
+        whitePieces.put(Piece.king(white, false), whiteKingPlacement);
+        whitePieces.put(Piece.rook(white, true), whiteRookPlacement);
+        blackPieces.put(Piece.king(black, false), blackKingPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        assertEquals("Expected 24 legal moves for white, including castling", 24, board.legalMoves().size());
+        
+        Move castleKingside = Move.createMove(board.getSquare("e1"), board.getSquare("g1"));
+        Move castleQueenside = Move.createMove(board.getSquare("e1"), board.getSquare("c1"));
+
+        assertFalse("Expected castling kingside is illegal", board.legalMoves().contains(castleKingside));
+        assertFalse("Expected castling queenside is illegal", board.legalMoves().contains(castleQueenside));
+    }
+    
+    @Test
+    public void testLegalMovesCastleIntoCheck() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteRookPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e1"));
+        blackKingPlacement.add(new Coordinate("e8"));
+        whiteRookPlacement.add(new Coordinate("h1"));
+        whiteRookPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("b2"));
+        
+        whitePieces.put(Piece.king(white, false), whiteKingPlacement);
+        whitePieces.put(Piece.rook(white, false), whiteRookPlacement);
+        blackPieces.put(Piece.king(black, false), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        assertEquals("Expected 25 legal moves for white, including castling", 25, board.legalMoves().size());
+        
+        Move castleKingside = Move.createMove(board.getSquare("e1"), board.getSquare("g1"));
+        Move castleQueenside = Move.createMove(board.getSquare("e1"), board.getSquare("c1"));
+
+        assertTrue("Expected castling kingside is legal", board.legalMoves().contains(castleKingside));
+        assertFalse("Expected castling queenside is illegal (into check)", board.legalMoves().contains(castleQueenside));
+    }
+    
+    @Test
+    public void testLegalMovesCastleThroughCheck() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteRookPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e1"));
+        blackKingPlacement.add(new Coordinate("e8"));
+        whiteRookPlacement.add(new Coordinate("h1"));
+        whiteRookPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("c2"));
+        
+        whitePieces.put(Piece.king(white, false), whiteKingPlacement);
+        whitePieces.put(Piece.rook(white, false), whiteRookPlacement);
+        blackPieces.put(Piece.king(black, false), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        assertEquals("Expected 24 legal moves for white, including castling", 24, board.legalMoves().size());
+        
+        Move castleKingside = Move.createMove(board.getSquare("e1"), board.getSquare("g1"));
+        Move castleQueenside = Move.createMove(board.getSquare("e1"), board.getSquare("c1"));
+
+        assertTrue("Expected castling kingside is legal", board.legalMoves().contains(castleKingside));
+        assertFalse("Expected castling queenside is illegal (through check)", board.legalMoves().contains(castleQueenside));
+    }
+    
+    @Test
+    public void testLegalMovesCastleOutOfCheck() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteRookPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e1"));
+        blackKingPlacement.add(new Coordinate("e8"));
+        whiteRookPlacement.add(new Coordinate("h1"));
+        whiteRookPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("d2"));
+        
+        whitePieces.put(Piece.king(white, false), whiteKingPlacement);
+        whitePieces.put(Piece.rook(white, false), whiteRookPlacement);
+        blackPieces.put(Piece.king(black, false), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        assertEquals("Expected 5 legal moves for white, including castling", 5, board.legalMoves().size());
+        
+        Move castleKingside = Move.createMove(board.getSquare("e1"), board.getSquare("g1"));
+        Move castleQueenside = Move.createMove(board.getSquare("e1"), board.getSquare("c1"));
+
+        assertFalse("Expected castling kingside is illegal", board.legalMoves().contains(castleKingside));
+        assertFalse("Expected castling queenside is illegal", board.legalMoves().contains(castleQueenside));
+    }
+    
+    @Test
+    public void testLegalMovesCastleQueenside() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> blackRookPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("c1"));
+        blackKingPlacement.add(new Coordinate("e8"));
+        blackRookPlacement.add(new Coordinate("a8"));
+        blackRookPlacement.add(new Coordinate("h8"));
+        whiteBishopPlacement.add(new Coordinate("d6"));
+        
+        whitePieces.put(Piece.king(white, false), whiteKingPlacement);
+        blackPieces.put(Piece.rook(black, false), blackRookPlacement);
+        blackPieces.put(Piece.king(black, false), blackKingPlacement);
+        whitePieces.put(Piece.bishop(white, true), whiteBishopPlacement);
+        
+        PieceColor turn = PieceColor.BLACK;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        assertEquals("Expected 23 legal moves for black, including castling", 23, board.legalMoves().size());
+        
+        Move castleKingside = Move.createMove(board.getSquare("e8"), board.getSquare("g8"));
+        Move castleQueenside = Move.createMove(board.getSquare("e8"), board.getSquare("c8"));
+        
+        assertFalse("Expected castling kingside is illegal", board.legalMoves().contains(castleKingside));
+        assertTrue("Expected castling queenside is legal", board.legalMoves().contains(castleQueenside));
+    }
+    
+    @Test
+    public void testMoveCastle() {
+        Board board = new Board();
+
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("e7"), board.getSquare("e5")));
+        board.move(Move.createMove(board.getSquare("g1"), board.getSquare("f3")));
+        board.move(Move.createMove(board.getSquare("b8"), board.getSquare("c6")));
+        board.move(Move.createMove(board.getSquare("f1"), board.getSquare("c4")));
+        board.move(Move.createMove(board.getSquare("f8"), board.getSquare("c5")));
+        board.move(Move.createMove(board.getSquare("c2"), board.getSquare("c3")));
+        board.move(Move.createMove(board.getSquare("g8"), board.getSquare("f6")));
+        board.move(Move.createMove(board.getSquare("d2"), board.getSquare("d4")));
+        board.move(Move.createMove(board.getSquare("e5"), board.getSquare("d4")));
+        board.move(Move.createMove(board.getSquare("c3"), board.getSquare("d4")));
+        board.move(Move.createMove(board.getSquare("c5"), board.getSquare("b4")));
+        board.move(Move.createMove(board.getSquare("b1"), board.getSquare("c3")));
+        board.move(Move.createMove(board.getSquare("f6"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("e1"), board.getSquare("g1")));
+        
+        String expectedBoard = "r - b q k - - r \n" 
+                             + "p p p p - p p p \n"
+                             + "- - n - - - - - \n" 
+                             + "- - - - - - - - \n" 
+                             + "- b B P n - - - \n"
+                             + "- - N - - N - - \n"
+                             + "P P - - - P P P \n"
+                             + "R - B Q - R K - \n";
+
+        assertEquals("Expected castling to be a valid move", expectedBoard, board.toString());
     }
     
     @Test

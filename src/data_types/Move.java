@@ -3,7 +3,7 @@ package data_types;
 import java.util.Set;
 
 /**
- * Represents a Chess Move. This class is immutable.
+ * Represents a Chess Move (handles castling). This class is immutable.
  * @author Bryson
  */
 public interface Move {
@@ -12,7 +12,9 @@ public interface Move {
     // Move = Normal(piece:Piece, coordFrom:Coordinate, coordTo:Coordinate) + Castle(turnSide:PieceColor, castleSide:CastleSide)
     
     /**
-     * Create a new move 
+     * Create a new move.
+     *  - to castle, set squareFrom to be the square that the king that is castling is currently on
+     *           and set squareTo to be the square that the king will land on after castling
      * @param squareFrom square that the current player clicked first
      * @param sqaureTo square that the current player clicked last
      * @return a Move object that represents the move that the current player made 
@@ -28,9 +30,17 @@ public interface Move {
         boolean pieceMovedTwoSquares = Math.abs(coordFrom.getX() - coordTo.getX()) == 2;
         
         if ((movedPiece.equals(unmovedWhiteKing) || movedPiece.equals(unmovedBlackKing)) && pieceMovedTwoSquares) {
-            // if the king lands on g1, then we castle kingside. Otherwise, we castle queenside.
-            CastleSide castleSide = (coordTo.equals(new Coordinate("g1"))) ? CastleSide.KINGSIDE : CastleSide.QUEENSIDE;
-            return new Castle(movedPiece.color(), castleSide);
+            if (movedPiece.equals(unmovedWhiteKing)) {
+                // if the king lands on g1, then we castle kingside. Otherwise, we castle queenside.
+                CastleSide castleSide = (coordTo.equals(new Coordinate("g1"))) ? CastleSide.KINGSIDE : CastleSide.QUEENSIDE;
+                return new Castle(movedPiece.color(), castleSide);
+            } else if (movedPiece.equals(unmovedBlackKing)) {
+                // if the king lands on g1, then we castle kingside. Otherwise, we castle queenside.
+                CastleSide castleSide = (coordTo.equals(new Coordinate("g8"))) ? CastleSide.KINGSIDE : CastleSide.QUEENSIDE;
+                return new Castle(movedPiece.color(), castleSide);
+            } else {
+                throw new RuntimeException("Impossible to be here. You broke computer science.");
+            }
         } else {
             return new Normal(movedPiece, coordFrom, coordTo);
         }
