@@ -163,6 +163,38 @@ public class BoardTest {
     }
     
     @Test
+    public void testLegalMovesBlockedPawn() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteBishopPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e1"));
+        blackKingPlacement.add(new Coordinate("e8"));
+        whiteBishopPlacement.add(new Coordinate("a6"));
+        blackPawnPlacement.add(new Coordinate("a7"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.bishop(white, true), whiteBishopPlacement);
+        blackPieces.put(Piece.king(black, false), blackKingPlacement);
+        blackPieces.put(Piece.pawn(black, false), blackPawnPlacement);
+        
+        PieceColor turn = PieceColor.BLACK;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        Move chessMove = Move.createMove(board.getSquare("a7"), board.getSquare("a5"));
+        
+        assertFalse("Expected unable for black pawns to jump over pieces", board.legalMoves().contains(chessMove));
+    }
+    
+    @Test
     public void testLegalMovesCastleKingMoved() {
         PieceColor white = PieceColor.WHITE;
         PieceColor black = PieceColor.BLACK;

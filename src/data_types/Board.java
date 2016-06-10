@@ -252,8 +252,9 @@ public class Board {
                         // can't push a pawn to land on a piece
                         if (squareTo.isOccupied() && coordFrom.getX() == coordTo.getX()) {continue;}
                         
-                        boolean pushedTwoSquares = coordTo.getY() == coordFrom.getY()+2;
-                        Square oneSquareAbove = getSquare(new Coordinate(coordFrom.getX(), coordFrom.getY()+1));
+                        boolean pushedTwoSquares = Math.abs(coordTo.getY() - coordFrom.getY()) == 2;
+                        int scalar = turn().equals(PieceColor.WHITE) ? 1 : -1;
+                        Square oneSquareAbove = getSquare(new Coordinate(coordFrom.getX(), coordFrom.getY()+1*scalar));
                        
                         // can't jump over pieces
                         if (pushedTwoSquares && oneSquareAbove.isOccupied()) {continue;}
