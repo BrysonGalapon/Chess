@@ -126,6 +126,7 @@ public class BoardTest {
     //  - move blocks a check, move does not block a check
     //  - move is a promotion, move is not a promotion
     //  - move is a castle move, move is not a castle move
+    //  - move is an en passent, move is not an en passent
     // 
     // blackPieces:
     //  - number of black pieces is 1, number of black pieces is > 1
@@ -160,6 +161,41 @@ public class BoardTest {
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testEnPassentWhite() {
+        Board board = new Board();
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a6")));
+        board.move(Move.createMove(board.getSquare("e4"), board.getSquare("e5")));
+        board.move(Move.createMove(board.getSquare("d7"), board.getSquare("d5")));
+        Move enPassent = Move.createMove(board.getSquare("e5"), board.getSquare("d6")); 
+        
+        assertTrue("Expected en passent to be a legal move in position: \n" + board, board.legalMoves().contains(enPassent));
+    
+        board.move(Move.createMove(board.getSquare("d2"), board.getSquare("d4")));
+        board.move(Move.createMove(board.getSquare("h7"), board.getSquare("h6")));
+        
+        assertFalse("Expected en passent to not be a legal move in position: \n" + board, board.legalMoves().contains(enPassent));
+    }
+    
+    @Test
+    public void testEnPassentBlack() {
+        Board board = new Board();
+        board.move(Move.createMove(board.getSquare("a2"), board.getSquare("a3")));
+        board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a5")));
+        board.move(Move.createMove(board.getSquare("c2"), board.getSquare("c4")));
+        board.move(Move.createMove(board.getSquare("a5"), board.getSquare("a4")));
+        board.move(Move.createMove(board.getSquare("b2"), board.getSquare("b4")));
+        Move enPassent = Move.createMove(board.getSquare("a4"), board.getSquare("b3")); 
+        
+        assertTrue("Expected en passent to be a legal move in position: \n" + board, board.legalMoves().contains(enPassent));
+    
+        board.move(Move.createMove(board.getSquare("b7"), board.getSquare("b6")));
+        board.move(Move.createMove(board.getSquare("g1"), board.getSquare("f3")));
+        
+        assertFalse("Expected en passent to not be a legal move in position: \n" + board, board.legalMoves().contains(enPassent));
     }
     
     @Test

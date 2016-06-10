@@ -23,9 +23,7 @@ public class Board {
     // TODO list:
     //
     // justify spec of move to not allow any more moves on board after checkmate, and add tests to test that
-    // change coordinate to coordinate in square class
     //
-    
     
     // Abstraction Function:
     // TODO: Do this.
@@ -267,17 +265,25 @@ public class Board {
                         if (pushedTwoSquares && oneSquareAbove.isOccupied()) {continue;}
                         
                         boolean isCaptureMove = coordTo.getX() != coordFrom.getX();
+                        boolean moveIsEnPassent = false;
                         Move lastMove = getLastMove();
-                        if (lastMove != null) {
-                            Piece lastMovePiece = getSquare(lastMove.coordFrom()).getPiece();
+                        if (lastMove != null && !lastMove.isCastle()) {
+                            Piece lastMovePiece = lastMove.movedPieces().iterator().next(); // remove arbitrary element from moved pieces (size is 1, so should be okay)
                             Coordinate lastMoveCoordFrom = lastMove.coordFrom();
                             Coordinate lastMoveCoordTo = lastMove.coordTo();
-                            boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && lastMoveCoordFrom.getY()+2 == lastMoveCoordTo.getY();
+                            
+                            boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
+                                                              Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
                             boolean pawnHadPushedAdjacentFile = lastMoveCoordFrom.getX() == coordTo.getX();
                             boolean pawnCanCapture = coordInBetween(lastMoveCoordFrom, lastMoveCoordTo).contains(coordTo);
-                            boolean canEnPassent = lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
+                            moveIsEnPassent = lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
                             
-                            if (isCaptureMove && !squareTo.isOccupied() && !canEnPassent) {continue;}
+                            if (isCaptureMove && !squareTo.isOccupied() && !moveIsEnPassent) {continue;}
+                        }
+                        
+                        if (moveIsEnPassent) {
+                            legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
+                            continue;
                         }
                         
                         if (isCaptureMove && !squareTo.isOccupied()) {continue;}
