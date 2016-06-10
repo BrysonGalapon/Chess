@@ -146,7 +146,7 @@ public class CoordinateTest {
         
         Coordinate coordinate = new Coordinate(point);
         
-        assertEquals("Expected (0, 0) for origin", "(0, 0)" , coordinate.toString());
+        assertEquals("Expected (0, 0) for origin", "a1" , coordinate.toString());
     }
     
     @Test
@@ -155,7 +155,7 @@ public class CoordinateTest {
         
         Coordinate coordinate = new Coordinate(point);
         
-        assertEquals("Expected correct toString for center square", "(5, 6)" , coordinate.toString());
+        assertEquals("Expected correct toString for center square", "f7" , coordinate.toString());
     }
     
     @Test

@@ -195,9 +195,9 @@ public class MoveTest {
         
         Move move = Move.createMove(squareFrom, squareTo);
         
-        assertEquals("Expected correct coordFrom coordinate", squareFrom.squareCoordinate(), move.coordFrom());
+        assertEquals("Expected correct coordFrom coordinate", squareFrom.coordinate(), move.coordFrom());
         
-        assertEquals("Expected correct coordTo coordinate", squareTo.squareCoordinate(), move.coordTo());
+        assertEquals("Expected correct coordTo coordinate", squareTo.coordinate(), move.coordTo());
     }
     
     @Test
@@ -214,8 +214,8 @@ public class MoveTest {
         
         Move move = Move.createMove(squareFrom, squareTo);
         
-        assertEquals("Expected correct coordFrom coordinate", squareFrom.squareCoordinate(), move.coordFrom());
+        assertEquals("Expected correct coordFrom coordinate", squareFrom.coordinate(), move.coordFrom());
         
-        assertEquals("Expected correct coordTo coordinate", squareTo.squareCoordinate(), move.coordTo());
+        assertEquals("Expected correct coordTo coordinate", squareTo.coordinate(), move.coordTo());
     }
 }

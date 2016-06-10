@@ -20,6 +20,13 @@ public class Board {
     private PieceColor turn;
     private Move lastMove;
     
+    // TODO list:
+    //
+    // justify spec of move to not allow any more moves on board after checkmate, and add tests to test that
+    // change coordinate to coordinate in square class
+    //
+    
+    
     // Abstraction Function:
     // TODO: Do this.
     //  
@@ -102,8 +109,8 @@ public class Board {
         assert !oppositeKingCheck();
         for (int row = 0; row < DEFAULT_SIZE; row++) {
             for (int col = 0; col < DEFAULT_SIZE; col++) {
-                assert grid[row][col].squareCoordinate().getX() == row;
-                assert grid[row][col].squareCoordinate().getY() == col;
+                assert grid[row][col].coordinate().getX() == row;
+                assert grid[row][col].coordinate().getY() == col;
             }
         }
         Set<Coordinate> whiteKingPlacement = whitePieces().get(retrieveKing(PieceColor.WHITE));
@@ -121,7 +128,7 @@ public class Board {
         Square squareFrom = getSquare(chessMove.coordFrom());
         Piece pieceToMove = squareFrom.getPiece();
         
-        Square squareSource = getSquare(squareFrom.squareCoordinate());
+        Square squareSource = getSquare(squareFrom.coordinate());
         
         if (! squareSource.isOccupied())
             throw new IllegalArgumentException("Piece not found");
@@ -166,11 +173,11 @@ public class Board {
                     if (piece.color().equals(black)) {
                         if (blackPieces.keySet().contains(piece)) {
                             Set<Coordinate> blackPlacement = blackPieces.get(piece);
-                            blackPlacement.add(square.squareCoordinate());
+                            blackPlacement.add(square.coordinate());
                             blackPieces.put(piece, blackPlacement);
                         } else {
                             Set<Coordinate> blackPlacement = new HashSet<>();
-                            blackPlacement.add(square.squareCoordinate());
+                            blackPlacement.add(square.coordinate());
                             blackPieces.put(piece, blackPlacement);
                         }
                     }
@@ -197,11 +204,11 @@ public class Board {
                      if (piece.color().equals(white)) {
                          if (whitePieces.keySet().contains(piece)) {
                              Set<Coordinate> whitePlacement = whitePieces.get(piece);
-                             whitePlacement.add(square.squareCoordinate());
+                             whitePlacement.add(square.coordinate());
                              whitePieces.put(piece, whitePlacement);
                          } else {
                              Set<Coordinate> whitePlacement = new HashSet<>();
-                             whitePlacement.add(square.squareCoordinate());
+                             whitePlacement.add(square.coordinate());
                              whitePieces.put(piece, whitePlacement);
                          }
                      }
@@ -294,12 +301,6 @@ public class Board {
                                 if (getSquare(rookCoord).getPiece().moved()) {continue;}
                                 // king may not castle out of, through, or into check
                                 if (!kingAvoidsCheck(coordFrom, coordTo)) {continue;}
-                                
-                                if (piece.equals(Piece.king(PieceColor.WHITE, false))) {
-                                    if (coordFrom.equals(new Coordinate("e1")) && coordTo.equals(new Coordinate("c1"))) {
-                                        System.out.println("YO MAMASDA");
-                                    }
-                                }
                                 
                                 legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
                                 continue;
@@ -429,7 +430,7 @@ public class Board {
         
         Square square = grid[xCoordinate][yCoordinate];
         
-        Square squareCopy = new Square(square.squareCoordinate());
+        Square squareCopy = new Square(square.coordinate());
         
         if (square.isOccupied()) {
             squareCopy.addPiece(square.getPiece());
@@ -444,9 +445,9 @@ public class Board {
      * @param square to be placed on the chess board
      */
     public void setSquare(Square square) {
-        Coordinate squareCoordinate = square.squareCoordinate();
+        Coordinate coordinate = square.coordinate();
         
-        grid[squareCoordinate.getX()][squareCoordinate.getY()] = square;
+        grid[coordinate.getX()][coordinate.getY()] = square;
         checkRep();
     }
     
@@ -671,8 +672,8 @@ public class Board {
         
         squareTo.addPiece(pieceToMove);
         
-        Coordinate coordFrom = squareFrom.squareCoordinate();
-        Coordinate coordTo = squareTo.squareCoordinate();
+        Coordinate coordFrom = squareFrom.coordinate();
+        Coordinate coordTo = squareTo.coordinate();
         
         grid[coordFrom.getX()][coordFrom.getY()] = squareFrom;
         grid[coordTo.getX()][coordTo.getY()] = squareTo;
@@ -684,7 +685,7 @@ public class Board {
      */
     private void restoreBoard(Set<Square> squareState) {
         for(Square square : squareState) {
-            grid[square.squareCoordinate().getX()][square.squareCoordinate().getY()] = square;
+            grid[square.coordinate().getX()][square.coordinate().getY()] = square;
         }
     }
     
@@ -796,10 +797,10 @@ public class Board {
         
         // move the king to coord
         Square squareFrom = getSquare(currentKingCoord);
-        Square newSquareFrom = new Square(squareFrom.squareCoordinate());
+        Square newSquareFrom = new Square(squareFrom.coordinate());
         forceSetSquare(newSquareFrom);
         Square squareTo = getSquare(coord);
-        Square newSquareTo = new Square(squareTo.squareCoordinate());
+        Square newSquareTo = new Square(squareTo.coordinate());
         newSquareTo.addPiece(kingOnBoard);
         forceSetSquare(newSquareTo);
         
@@ -882,9 +883,9 @@ public class Board {
      * @param square to be placed on the chess board
      */
     public void forceSetSquare(Square square) {
-        Coordinate squareCoordinate = square.squareCoordinate();
+        Coordinate coordinate = square.coordinate();
         
-        grid[squareCoordinate.getX()][squareCoordinate.getY()] = square;
+        grid[coordinate.getX()][coordinate.getY()] = square;
     }
     
     /**

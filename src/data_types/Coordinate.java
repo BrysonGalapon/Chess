@@ -110,19 +110,25 @@ public class Coordinate {
     /**
      * Retrieve the string representation of this coordinate
      * 
-     * @return a string in the form "(x, y)", where (x, y) is the coordinate associated
-     *         to this Coordinate
+     * @return a string in the form "%s%d", where %s is the letter of the file 
+     *         associated to the x-coordinate, and %d is the number of the rank
+     *         associated to the y-coordinate
      */
     @Override
     public String toString() {
-        return String.format("(%d, %d)", getX(), getY());
+        Character letter = null;
+        
+        for (Character key : letterToNumber.keySet()) {
+            if (letterToNumber.get(key) == getX()) {
+                letter = key;
+            }
+        }
+        
+        return String.format("%s%d", letter, getY()+1);
     }
     
     @Override
     public int hashCode() {
         return getX()*getY();
     }
-
-    //TODO: Add tests for toString, equals
-
 }

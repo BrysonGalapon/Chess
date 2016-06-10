@@ -25,8 +25,8 @@ public interface Move {
         Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
         Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
         
-        Coordinate coordFrom = squareFrom.squareCoordinate();
-        Coordinate coordTo = squareTo.squareCoordinate();
+        Coordinate coordFrom = squareFrom.coordinate();
+        Coordinate coordTo = squareTo.coordinate();
         boolean pieceMovedTwoSquares = Math.abs(coordFrom.getX() - coordTo.getX()) == 2;
         
         if ((movedPiece.equals(unmovedWhiteKing) || movedPiece.equals(unmovedBlackKing)) && pieceMovedTwoSquares) {

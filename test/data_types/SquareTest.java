@@ -22,7 +22,7 @@ public class SquareTest {
     // getPiece:
     //  - piece is a pawn, piece is not a pawn
     // 
-    // squareCoordinate:
+    // coordinate:
     //  - coordinate is origin, coordinate is not origin
     //  - coordinate is on edge, coordinate is not on edge 
     //  - coordinate is in center, coordinate is not in center
@@ -87,7 +87,7 @@ public class SquareTest {
         
         square.removePiece();
         
-        assertEquals("Expected nothing to happen when removing from empty square", squareCopy.squareCoordinate(), square.squareCoordinate());
+        assertEquals("Expected nothing to happen when removing from empty square", squareCopy.coordinate(), square.coordinate());
         assertEquals("Expected nothing to happen when removing from empty square", squareCopy.isOccupied(), square.isOccupied());
         assertFalse("Expected empty square", square.isOccupied());
     }
@@ -117,27 +117,27 @@ public class SquareTest {
     }
     
     @Test
-    public void testSquareCoordinateOrigin() {
+    public void testcoordinateOrigin() {
         Coordinate coord = new Coordinate(0, 0);
         
         Square square = new Square(coord);
-        assertEquals("Expected equivalent coordinate", coord, square.squareCoordinate());
+        assertEquals("Expected equivalent coordinate", coord, square.coordinate());
     }
     
     @Test
-    public void testSquareCoordinateEdge() {
+    public void testcoordinateEdge() {
         Coordinate coord = new Coordinate(0, 6);
         
         Square square = new Square(coord);
-        assertEquals("Expected equivalent coordinate", coord, square.squareCoordinate());
+        assertEquals("Expected equivalent coordinate", coord, square.coordinate());
     }
     
     @Test
-    public void testSquareCoordinateCenter() {
+    public void testcoordinateCenter() {
         Coordinate coord = new Coordinate(3, 4);
         
         Square square = new Square(coord);
-        assertEquals("Expected equivalent coordinate", coord, square.squareCoordinate());
+        assertEquals("Expected equivalent coordinate", coord, square.coordinate());
     }
     
     @Test

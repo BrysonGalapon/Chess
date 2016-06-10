@@ -90,7 +90,7 @@ public class Square {
      * Retrieve the coordinate of this square
      * @return the coordinate of this square
      */
-    public Coordinate squareCoordinate() {
+    public Coordinate coordinate() {
         return coordinate;
     }
     
