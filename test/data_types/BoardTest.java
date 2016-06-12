@@ -116,6 +116,28 @@ public class BoardTest {
         }
     }
     
+    @Test
+    public void testBoardConstructor() {
+        Board board = new Board();
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("e7"), board.getSquare("e5")));
+        board.move(Move.createMove(board.getSquare("g1"), board.getSquare("f3")));
+        board.move(Move.createMove(board.getSquare("b8"), board.getSquare("c6")));
+        board.move(Move.createMove(board.getSquare("f1"), board.getSquare("c4")));        
+        board.move(Move.createMove(board.getSquare("f8"), board.getSquare("c5")));
+        board.move(Move.createMove(board.getSquare("c2"), board.getSquare("c3")));
+        board.move(Move.createMove(board.getSquare("g8"), board.getSquare("f6")));
+        board.move(Move.createMove(board.getSquare("d2"), board.getSquare("d4")));
+
+        Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn());
+        
+        assertEquals("Expected board copy to have same white pieces", board.whitePieces(), boardCopy.whitePieces());
+        assertEquals("Expected board copy to have same black pieces", board.blackPieces(), boardCopy.blackPieces());
+        assertEquals("Expected board copy to have same turn", board.turn(), boardCopy.turn());
+        assertEquals("Expected board copy to have same set of legal moves", board.legalMoves(), boardCopy.legalMoves());
+        assertEquals("Expected board copy to look the same as board", board.toString(), boardCopy.toString());
+    }
+    
     // Testing Strategy:
     // 
     // move:
@@ -157,6 +179,8 @@ public class BoardTest {
     //  - last move was the first move in the game, last move was not the first move in the game
     //  - last move was white's last move, last move was black's last move
     // 
+    
+    // TODO write tests for flipTurn and setLastMove, setSquareSet
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {

@@ -370,6 +370,14 @@ public class Board {
     }
     
     /**
+     * Give this board a new last move
+     * @param lastMove the last move to give to this board
+     */
+    public void setLastMove(Move lastMove) {
+        this.lastMove = lastMove;
+    }
+    
+    /**
      * Retrieve the square at the given coordinate
      * @param coord coordinate of square to obtain
      * @return the square at coordinate coord
@@ -456,6 +464,29 @@ public class Board {
         grid[coordinate.getX()][coordinate.getY()] = square;
         checkRep();
     }
+    
+    /**
+     * Flip the current turn to the opposing side (or pass the turn), without changing the 
+     *  physical board
+     */
+    public void flipTurn() {
+        if (this.turn.equals(PieceColor.BLACK)) {
+            this.turn = PieceColor.WHITE;
+        } else {
+            this.turn = PieceColor.BLACK;
+        }
+    }
+    
+    /**
+     * Change a group of squares on this board
+     * @param squareSet set of squares to place on this board
+     */
+    public void setSquareSet(Set<Square> squareSet) {
+        for (Square square : squareSet) {
+            forceSetSquare(square);
+        }
+    }
+    
     
     /**
      * Retrieve the string representation of this board, from white's perspective
@@ -888,7 +919,7 @@ public class Board {
      * Foribly Replace a square on the chess board
      * @param square to be placed on the chess board
      */
-    public void forceSetSquare(Square square) {
+    private void forceSetSquare(Square square) {
         Coordinate coordinate = square.coordinate();
         
         grid[coordinate.getX()][coordinate.getY()] = square;
