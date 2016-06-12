@@ -90,7 +90,7 @@ public class Bishop implements Piece {
         
         boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherBishop.moveSet(D4_COORDINATE));
         boolean colorSame = this.color().equals(otherBishop.color());
-        boolean movedSame = this.moved() == otherBishop.moved();
+        boolean movedSame = this.hasMoved() == otherBishop.hasMoved();
         
         // considered equivalent if they have an equivalent moveSet when placed on d4
         return  moveSetSame && colorSame && movedSame;
@@ -112,7 +112,12 @@ public class Bishop implements Piece {
     }
 
     @Override
-    public boolean moved() {
+    public boolean hasMoved() {
         return moved;
+    }
+
+    @Override
+    public Piece getMovedVersion() {
+        return new Bishop(color, true);
     }
 }

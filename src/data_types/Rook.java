@@ -84,7 +84,7 @@ public class Rook implements Piece {
         
         boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherRook.moveSet(D4_COORDINATE));
         boolean colorSame = this.color().equals(otherRook.color());
-        boolean movedSame = this.moved() == otherRook.moved();
+        boolean movedSame = this.hasMoved() == otherRook.hasMoved();
         
         // considered equivalent if they have an equivalent moveSet when placed on d4
         return  moveSetSame && colorSame && movedSame;
@@ -106,7 +106,12 @@ public class Rook implements Piece {
     }
 
     @Override
-    public boolean moved() {
+    public boolean hasMoved() {
         return moved;
+    }
+
+    @Override
+    public Piece getMovedVersion() {
+        return new Rook(color, true);
     }
 }

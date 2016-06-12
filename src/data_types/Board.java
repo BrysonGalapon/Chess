@@ -304,7 +304,7 @@ public class Board {
                                 // rook may not be there
                                 if (!getSquare(rookCoord).isOccupied()) {continue;}
                                 // rook may not have moved before
-                                if (getSquare(rookCoord).getPiece().moved()) {continue;}
+                                if (getSquare(rookCoord).getPiece().hasMoved()) {continue;}
                                 // king may not castle out of, through, or into check
                                 if (!kingAvoidsCheck(coordFrom, coordTo)) {continue;}
                                 
@@ -704,8 +704,7 @@ public class Board {
         
         squareFrom.removePiece();
         
-        if (pieceToMove.isPawn())
-            pieceToMove = Piece.pawn(pieceToMove.color(), true);
+        pieceToMove = pieceToMove.getMovedVersion();
         
         squareTo.addPiece(pieceToMove);
         

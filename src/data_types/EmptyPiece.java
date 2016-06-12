@@ -64,7 +64,12 @@ public class EmptyPiece implements Piece {
     }
 
     @Override
-    public boolean moved() {
+    public boolean hasMoved() {
+        throw new RuntimeException("Called operation on non-existent piece");
+    }
+
+    @Override
+    public Piece getMovedVersion() {
         throw new RuntimeException("Called operation on non-existent piece");
     }
 }

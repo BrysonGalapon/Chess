@@ -179,12 +179,25 @@ public class BoardTest {
     //  - last move was the first move in the game, last move was not the first move in the game
     //  - last move was white's last move, last move was black's last move
     // 
+    // flipTurn:
+    //  - turn is white's move, turn is black's move
+    // 
+    //
     
-    // TODO write tests for flipTurn and setLastMove, setSquareSet
+    // TODO write tests and setLastMove, setSquareSet
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testFlipTurn() {
+        Board board = new Board();
+        board.flipTurn();
+        assertEquals("Expected turn to flip to black", PieceColor.BLACK, board.turn());
+        board.flipTurn();
+        assertEquals("Expected turn to flip to white", PieceColor.WHITE, board.turn());
     }
     
     @Test
@@ -255,7 +268,7 @@ public class BoardTest {
     }
     
     @Test
-    public void testLegalMovesCastleKingMoved() {
+    public void testLegalMovesCastleWhiteKingMoved() {
         PieceColor white = PieceColor.WHITE;
         PieceColor black = PieceColor.BLACK;
         
@@ -283,6 +296,36 @@ public class BoardTest {
         Board board = new Board(whitePieces, blackPieces, turn);
         
         assertEquals("Expected 24 legal moves for white, including castling", 24, board.legalMoves().size());
+    }
+    
+    @Test
+    public void testLegalMovesCastleBlackKingMoved() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackRookPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e1"));
+        blackKingPlacement.add(new Coordinate("e8"));
+        blackRookPlacement.add(new Coordinate("a8"));
+        blackRookPlacement.add(new Coordinate("h8"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.rook(black, false), blackRookPlacement);
+        
+        PieceColor turn = PieceColor.BLACK;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        for (Move move : board.legalMoves()) {
+            assertFalse("Expected no castle moves for moved king", move.isCastle());
+        }
     }
     
     @Test
@@ -689,7 +732,7 @@ public class BoardTest {
         
         Pawn unmovedPawn = (Pawn) piece;
         
-        assertFalse("Expected unmoved pawn to be unmoved", unmovedPawn.moved());
+        assertFalse("Expected unmoved pawn to be unmoved", unmovedPawn.hasMoved());
         
         Move firstMove = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
         
@@ -701,13 +744,14 @@ public class BoardTest {
         
         Pawn movedPawn = (Pawn) movedPiece;
         
-        assertTrue("Expected pawn moved", movedPawn.moved());
+        assertTrue("Expected pawn moved", movedPawn.hasMoved());
     }
     
     @Test 
     public void testMoveKnight() {
         PieceColor white = PieceColor.WHITE;
-        Piece knight = Piece.knight(white, false);
+        Piece unmovedKnight = Piece.knight(white, false);
+        Piece movedKnight = Piece.knight(white, true);
         
         Board board = new Board();
         
@@ -718,11 +762,15 @@ public class BoardTest {
         
         board.move(move);
         
-        Set<Coordinate> whiteKnightPlacement = new HashSet<Coordinate>();
-        whiteKnightPlacement.add(new Coordinate("c3"));
-        whiteKnightPlacement.add(new Coordinate("g1"));
+        Set<Coordinate> whiteUnmovedKnightPlacement = new HashSet<Coordinate>();
+        whiteUnmovedKnightPlacement.add(new Coordinate("g1"));
         
-        assertEquals("Expected Knight to move to c3", whiteKnightPlacement, board.whitePieces().get(knight));
+        Set<Coordinate> whiteMovedKnightPlacement = new HashSet<Coordinate>();
+        whiteMovedKnightPlacement.add(new Coordinate("c3"));
+        
+        assertEquals("Expected Knight to move from g1 to c3", whiteUnmovedKnightPlacement, board.whitePieces().get(unmovedKnight));
+        assertEquals("Expected Knight to move from g1 to c3", whiteMovedKnightPlacement, board.whitePieces().get(movedKnight));
+        assertTrue("Expected knight on c3 to have moved", board.getSquare("c3").getPiece().hasMoved());
     }
     
     @Test

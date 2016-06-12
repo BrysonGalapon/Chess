@@ -55,7 +55,15 @@ public interface Piece {
      * Check if this pawn has moved or not
      * @return true if this pawn has moved
      */
-    public boolean moved();
+    public boolean hasMoved();
+
+    /**
+     * Retrieve the moved version of this piece. 
+     * @return the moved version of this piece
+     *          - if this piece has already moved, then 
+     *            return itself
+     */
+    public Piece getMovedVersion();
     
     /** Retrieve the set of coordinates a particular chess piece can land on 
      *      on an empty board, including capture and castling moves, 

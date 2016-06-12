@@ -73,7 +73,7 @@ public class Queen implements Piece {
         
         boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherQueen.moveSet(D4_COORDINATE));
         boolean colorSame = this.color().equals(otherQueen.color());
-        boolean movedSame = this.moved() == otherQueen.moved();
+        boolean movedSame = this.hasMoved() == otherQueen.hasMoved();
         
         // considered equivalent if they have an equivalent moveSet when placed on d4
         return  moveSetSame && colorSame && movedSame;        
@@ -95,8 +95,13 @@ public class Queen implements Piece {
     }
 
     @Override
-    public boolean moved() {
+    public boolean hasMoved() {
         return moved;
+    }
+
+    @Override
+    public Piece getMovedVersion() {
+        return new Queen(color, true);
     }
 
 }

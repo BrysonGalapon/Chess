@@ -56,7 +56,7 @@ public class King implements Piece {
             }
         }
         
-        if (!moved()) {
+        if (!hasMoved()) {
             if (coord.equals(new Coordinate("e1")) && color().equals(PieceColor.WHITE)) {
                 moves.add(new Coordinate("g1"));
                 moves.add(new Coordinate("c1"));
@@ -98,7 +98,7 @@ public class King implements Piece {
         
         boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherKing.moveSet(D4_COORDINATE));
         boolean colorSame = this.color().equals(otherKing.color());
-        boolean movedSame = this.moved() == otherKing.moved();
+        boolean movedSame = this.hasMoved() == otherKing.hasMoved();
         
         // considered equivalent if they have an equivalent moveSet when placed on d4
         return  moveSetSame && colorSame && movedSame;
@@ -120,8 +120,13 @@ public class King implements Piece {
     }
 
     @Override
-    public boolean moved() {
+    public boolean hasMoved() {
         return moved;
+    }
+
+    @Override
+    public Piece getMovedVersion() {
+        return new King(color, true);
     }
 }
 

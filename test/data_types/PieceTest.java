@@ -73,26 +73,52 @@ public class PieceTest {
     //  - piece is a queen, piece is not a queen
     //  - piece is empty, piece is not empty
     // 
-    // moved: 
+    // hasMoved: 
     //  - piece is a pawn, piece is not a pawn
     //  - piece has moved, piece has not moved
+    // 
+    // getMovedVersion:
+    //  - piece has moved, piece has not moved
+    //  - piece is a pawn, piece is not a pawn
     // 
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
     }
-    
+
     @Test
-    public void testMovedMovedPawn() {
-        Piece pawn = Piece.pawn(PieceColor.WHITE, true);
-        assertTrue("Expected moved pawn to have moved", pawn.moved());
+    public void testMovedVersionUnmovedPawn() {
+        Piece pawn = Piece.pawn(PieceColor.WHITE, false);
+        Piece pawnMovedVersion = pawn.getMovedVersion();
+        
+        assertTrue("Expected new version of pawn to be a pawn", pawnMovedVersion.isPawn());
+        assertTrue("Expected moved version of pawn to have moved", pawnMovedVersion.hasMoved());
     }
     
     @Test
-    public void testMovedUnmovedKnight() {
+    public void testMovedVersionMovedPiece() {
+        Piece queen = Piece.queen(PieceColor.BLACK, true);
+        Piece queenMovedVersion = queen.getMovedVersion();
+        
+        assertEquals("Expected piece to be a queen", "Q", queen.toString());
+        assertTrue("Expected moved version of queen to have moved", queenMovedVersion.hasMoved());
+    }
+    
+    @Test
+    public void testMovedMovedPiece() {
+        Piece pawn = Piece.pawn(PieceColor.WHITE, true);
+        Piece king = Piece.king(PieceColor.BLACK, true);
+        assertTrue("Expected moved pawn to have moved", pawn.hasMoved());
+        assertTrue("Expected moved king to have moved", king.hasMoved());
+    }
+    
+    @Test
+    public void testMovedUnmovedPiece() {
         Piece knight = Piece.knight(PieceColor.BLACK, false);
-        assertFalse("Expected unmoved knight to have not moved", knight.moved());
+        Piece queen = Piece.queen(PieceColor.WHITE, false);
+        assertFalse("Expected unmoved knight to have not moved", knight.hasMoved());
+        assertFalse("Expected unmoved queen to have not moved", queen.hasMoved());
     }
     
     @Test
@@ -192,17 +218,14 @@ public class PieceTest {
     public void testPawnMove() {
         PieceColor color = PieceColor.WHITE;
         
-        Piece pawn1 = Piece.pawn(color, true);
-        Piece pawn2 = Piece.pawn(color, false);
+        Piece movedPawn = Piece.pawn(color, true);
+        Piece unmovedPawn = Piece.pawn(color, false);
         
-        assertTrue("Expected pawns to be pawns", pawn1.isPawn());
-        assertTrue("Expected pawns to be pawns", pawn2.isPawn());
+        assertTrue("Expected pawns to be pawns", movedPawn.isPawn());
+        assertTrue("Expected pawns to be pawns", unmovedPawn.isPawn());
 
-        Pawn movedPawn = (Pawn) pawn1;
-        Pawn unmovedPawn = (Pawn) pawn2;
-        
-        assertTrue("Expected moved pawn to have moved", movedPawn.moved());
-        assertFalse("Expected unmoved pawn to not have moved", unmovedPawn.moved());
+        assertTrue("Expected moved pawn to have moved", movedPawn.hasMoved());
+        assertFalse("Expected unmoved pawn to not have moved", unmovedPawn.hasMoved());
     }
     
     @Test

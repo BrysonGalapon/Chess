@@ -69,15 +69,6 @@ public class Pawn implements Piece {
         return moves;
     }
     
-    /**
-     * Check if this pawn has moved or not
-     * @return true if this pawn has moved
-     */
-    @Override
-    public boolean moved() {
-        return moved;
-    }
-
     @Override
     public PieceColor color() {
         return color;
@@ -97,7 +88,7 @@ public class Pawn implements Piece {
         // considered equivalent if they have an equivalent moveSet when placed on d4
         boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherPawn.moveSet(D4_COORDINATE));
         boolean colorSame = this.color().equals(otherPawn.color());
-        boolean movedSame = this.moved() == otherPawn.moved();
+        boolean movedSame = this.hasMoved() == otherPawn.hasMoved();
         
         // considered equivalent if they have an equivalent moveSet when placed on d4
         return  moveSetSame && colorSame && movedSame;
@@ -116,5 +107,15 @@ public class Pawn implements Piece {
     @Override
     public boolean isPawn() {
         return true;
+    }
+
+    @Override
+    public boolean hasMoved() {
+       return moved;
+    }
+
+    @Override
+    public Piece getMovedVersion() {
+        return new Pawn(color, true);
     }
 }

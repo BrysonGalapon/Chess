@@ -102,7 +102,7 @@ public class Knight implements Piece {
         
         boolean moveSetSame = this.moveSet(D4_COORDINATE).equals(otherKnight.moveSet(D4_COORDINATE));
         boolean colorSame = this.color().equals(otherKnight.color());
-        boolean movedSame = this.moved() == otherKnight.moved();
+        boolean movedSame = this.hasMoved() == otherKnight.hasMoved();
         
         // considered equivalent if they have an equivalent moveSet when placed on d4
         return  moveSetSame && colorSame && movedSame;
@@ -124,7 +124,12 @@ public class Knight implements Piece {
     }
 
     @Override
-    public boolean moved() {
+    public boolean hasMoved() {
         return moved;
+    }
+
+    @Override
+    public Piece getMovedVersion() {
+        return new Knight(color, true);
     }
 }
