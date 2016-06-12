@@ -218,6 +218,31 @@ public class BoardTest {
     }
     
     @Test
+    public void testEnPassentWhiteCapture() {
+        Board board = new Board();
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a6")));
+        board.move(Move.createMove(board.getSquare("e4"), board.getSquare("e5")));
+        board.move(Move.createMove(board.getSquare("d7"), board.getSquare("d5")));
+        board.move(Move.createMove(board.getSquare("e5"), board.getSquare("d6")));
+        
+        assertFalse("Expected pawn on d5 to be taken", board.getSquare("d5").isOccupied());
+    }
+    
+    @Test
+    public void testEnPassentBlackapture() {
+        Board board = new Board();
+        board.move(Move.createMove(board.getSquare("a2"), board.getSquare("a3")));
+        board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a5")));
+        board.move(Move.createMove(board.getSquare("c2"), board.getSquare("c4")));
+        board.move(Move.createMove(board.getSquare("a5"), board.getSquare("a4")));
+        board.move(Move.createMove(board.getSquare("b2"), board.getSquare("b4")));
+        board.move(Move.createMove(board.getSquare("a4"), board.getSquare("b3")));
+        
+        assertFalse("Expected pawn on b4 to be taken", board.getSquare("b4").isOccupied());
+    }
+    
+    @Test
     public void testEnPassentBlack() {
         Board board = new Board();
         board.move(Move.createMove(board.getSquare("a2"), board.getSquare("a3")));

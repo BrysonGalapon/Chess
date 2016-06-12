@@ -23,7 +23,14 @@ public class Board {
     // TODO list:
     //
     // justify spec of move to not allow any more moves on board after checkmate, and add tests to test that
-    //
+    // add 'kingIsCastled(PieceColor side)' observer to check if a certain side castled
+    // change heuristic in main so that rooks like open files, and that comp likes castling
+    // add 'isUnprotected(Square square)' observer to check if a certain square on the board is unprotected
+    // add 'getUnProtectedSquares()' observer
+    // add 'isCaptureMove' observer to Move
+    // add 'value' observer to Piece spec
+    // add 'Set<Piece> canCapture(Square square, PieceColor side)' to obtain
+    //        all pieces that the player on 'side' can capture a piece on square
     
     // Abstraction Function:
     // TODO: Do this.
@@ -698,11 +705,45 @@ public class Board {
         Square squareTo = getSquare(move.coordTo());
         Piece pieceToMove = squareFrom.getPiece();
         
+        Coordinate coordinateTo = squareTo.coordinate();
+        
         if (!squareFrom.isOccupied()) {
             throw new RuntimeException("No piece is there to move");
         }
         
         squareFrom.removePiece();
+        
+        Move lastMove = getLastMove();
+        
+        if (lastMove != null) {
+            if (!lastMove.isCastle()) {
+                Coordinate lastMoveCoordFrom = lastMove.coordFrom();
+                Coordinate lastMoveCoordTo = lastMove.coordTo();
+                Piece lastMovePiece = lastMove.movedPieces().iterator().next();
+                
+                boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
+                        Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
+                boolean pawnHadPushedAdjacentFile = lastMoveCoordFrom.getX() == move.coordTo().getX();
+                boolean pawnCanCapture = coordInBetween(lastMoveCoordFrom, lastMoveCoordTo).contains(move.coordTo());
+                boolean moveIsEnPassent = lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
+                
+                PieceColor color = pieceToMove.color();
+                if (moveIsEnPassent) {
+                    if (color.equals(PieceColor.WHITE)) {
+                        Square square = getSquare(new Coordinate(coordinateTo.getX(), coordinateTo.getY()-1));
+                        square.removePiece();
+                        setSquare(square);
+                    } else if (color.equals(PieceColor.BLACK)){
+                        Square square = getSquare(new Coordinate(coordinateTo.getX(), coordinateTo.getY()+1));
+                        square.removePiece();
+                        setSquare(square);
+                    } else {
+                        throw new RuntimeException("Color is not one of white or black");
+                    }
+                }
+            }
+        }
+        
         
         pieceToMove = pieceToMove.getMovedVersion();
         
