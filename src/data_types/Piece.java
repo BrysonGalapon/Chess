@@ -92,6 +92,19 @@ public interface Piece {
      */
     public boolean isPawn();
     
+    /**
+     * Retrieve the value of this piece 
+     * @return the material value of this piece, where the value mappings are given by:
+     * 
+     *      King   -> 0 points (king has an undefined material value)
+     *      Queen  -> 9 points
+     *      Rook   -> 5 points
+     *      Bishop -> 3 points
+     *      Knight -> 3 points
+     *      Pawn   -> 1 point
+     */
+    public int value();
+    
     // TODO Finish re-implementing equals/write tests for it
     @Override
     public boolean equals(Object other);

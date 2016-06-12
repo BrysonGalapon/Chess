@@ -128,5 +128,10 @@ public class King implements Piece {
     public Piece getMovedVersion() {
         return new King(color, true);
     }
+
+    @Override
+    public int value() {
+        return 0;
+    }
 }
 

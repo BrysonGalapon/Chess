@@ -132,4 +132,9 @@ public class Knight implements Piece {
     public Piece getMovedVersion() {
         return new Knight(color, true);
     }
+
+    @Override
+    public int value() {
+        return 3;
+    }
 }

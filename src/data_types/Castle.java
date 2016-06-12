@@ -121,4 +121,9 @@ public class Castle implements Move{
         
         return king.hashCode() + coordTo().hashCode() + coordFrom().hashCode();
     }
+
+    @Override
+    public boolean isCapture() {
+        return false;
+    }
 }

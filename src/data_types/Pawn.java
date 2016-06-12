@@ -118,4 +118,9 @@ public class Pawn implements Piece {
     public Piece getMovedVersion() {
         return new Pawn(color, true);
     }
+
+    @Override
+    public int value() {
+        return 1;
+    }
 }

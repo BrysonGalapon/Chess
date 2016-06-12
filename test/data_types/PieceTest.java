@@ -81,10 +81,34 @@ public class PieceTest {
     //  - piece has moved, piece has not moved
     //  - piece is a pawn, piece is not a pawn
     // 
+    // value:
+    //  - piece is a pawn, piece is not a pawn
+    //  - piece is a knight, piece is not a knight
+    //  - piece is a rook, piece is not a rook
+    //  - piece is a bishop, piece is not a bishop
+    //  - piece is a queen, piece is not a queen
+    //
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testValue() {
+        Piece pawn = Piece.pawn(PieceColor.WHITE, true);
+        Piece rook = Piece.rook(PieceColor.BLACK, true);
+        Piece knight = Piece.knight(PieceColor.WHITE, false);
+        Piece bishop = Piece.bishop(PieceColor.BLACK, false);
+        Piece queen = Piece.queen(PieceColor.WHITE, false);
+        Piece king = Piece.king(PieceColor.WHITE, true);
+        
+        assertEquals("Expected pawn to be worth 1 point", 1, pawn.value());
+        assertEquals("Expected rook to be worth 5 points", 5, rook.value());
+        assertEquals("Expected knight to be worth 3 points", 3, knight.value());
+        assertEquals("Expected bishop to be worth 3 points", 3, bishop.value());
+        assertEquals("Expected queen to be worth 9 points", 9, queen.value());
+        assertEquals("Expected king to be worth 0 points", 0, king.value());
     }
 
     @Test

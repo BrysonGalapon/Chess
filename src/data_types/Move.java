@@ -42,7 +42,7 @@ public interface Move {
                 throw new RuntimeException("Impossible to be here. You broke computer science.");
             }
         } else {
-            return new Normal(movedPiece, coordFrom, coordTo);
+            return new Normal(movedPiece, coordFrom, coordTo, squareTo.getPiece());
         }
     }
     
@@ -81,6 +81,12 @@ public interface Move {
      * @return true if and only if this move is a castling move
      */
     public boolean isCastle();
+    
+    /**
+     * Check if this move captures a piece
+     * @return true if and only if this move captures a piece
+     */
+    public boolean isCapture();
     
     /**
      * Retrieve the string representation of this move

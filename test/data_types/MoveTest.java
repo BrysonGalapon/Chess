@@ -29,10 +29,61 @@ public class MoveTest {
     //  - move is a castle move, move is not a castle move
     //  - move is a pawn move, move is not a pawn move
     // 
+    // isCapture:
+    //  - move is a capture, move is not a capture
+    //  - capture is with a pawn, capture is not with a pawn
+    //  - move is a castle move, move is not a castle move
+    // 
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testIsCaptureCastle() {
+        Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
+        Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
+        
+        Square squareFromWhite = new Square(new Coordinate("e1"));
+        Square squareFromBlack = new Square(new Coordinate("e8"));
+        
+        Square squareToWhite = new Square(new Coordinate("g1"));
+        Square squareToBlack = new Square(new Coordinate("c8"));
+        
+        squareFromWhite.addPiece(unmovedWhiteKing);
+        squareFromBlack.addPiece(unmovedBlackKing);
+        
+        Move whiteCastleKingside = Move.createMove(squareFromWhite, squareToWhite);
+        Move blackCastleQueenside = Move.createMove(squareFromBlack, squareToBlack);
+        
+        assertFalse("Expected castling to never capture a piece", whiteCastleKingside.isCapture());
+        assertFalse("Expected castling to never capture a piece", blackCastleQueenside.isCapture());
+    }
+    
+    @Test
+    public void testIsCaptureNotCapture() {
+        Board board = new Board();
+        Move move = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
+        
+        assertFalse("Expected opening pawn move to not be a capture", move.isCapture());
+    }
+    
+    @Test
+    public void testIsCaptureCapture() {
+        Board board = new Board();
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("d7"), board.getSquare("d5")));
+        
+        Move pawnCapture = Move.createMove(board.getSquare("e4"), board.getSquare("d5"));
+
+        assertTrue("Expected pawn capture to be a capture move", pawnCapture.isCapture());
+        
+        board.move(pawnCapture);
+        
+        Move queenCapture = Move.createMove(board.getSquare("d8"), board.getSquare("d5"));
+        
+        assertTrue("Expected queen recapture to be a capture move", queenCapture.isCapture());
     }
     
     @Test

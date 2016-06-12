@@ -104,4 +104,8 @@ public class Queen implements Piece {
         return new Queen(color, true);
     }
 
+    @Override
+    public int value() {
+        return 9;
+    }
 }

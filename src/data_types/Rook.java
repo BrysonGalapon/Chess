@@ -114,4 +114,9 @@ public class Rook implements Piece {
     public Piece getMovedVersion() {
         return new Rook(color, true);
     }
+
+    @Override
+    public int value() {
+        return 5;
+    }
 }

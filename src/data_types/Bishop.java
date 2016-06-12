@@ -120,4 +120,9 @@ public class Bishop implements Piece {
     public Piece getMovedVersion() {
         return new Bishop(color, true);
     }
+
+    @Override
+    public int value() {
+        return 3;
+    }
 }

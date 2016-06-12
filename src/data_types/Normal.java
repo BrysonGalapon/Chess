@@ -11,10 +11,12 @@ public class Normal implements Move {
     private final Piece piece;
     private final Coordinate coordFrom;
     private final Coordinate coordTo;
+    private final Piece capturedPiece;
     
     // Abstraction Function:
     //  - represents the move of piece piece from the square at coordinate coordFrom to 
-    //        the square at coordinate coordTo on a chess board
+    //        the square at coordinate coordTo on a chess board, possibly taking capturedPiece 
+    //        on the arrival square
     // 
     // Rep Invariant:
     //  - moving the piece from coordFrom to coordTo is a valid chess move
@@ -31,10 +33,11 @@ public class Normal implements Move {
      * @param coordFrom coordinate that this piece is being moved from
      * @param coordTo coordinate that this piece is being moved to
      */
-    public Normal(Piece piece, Coordinate coordFrom, Coordinate coordTo) {
+    public Normal(Piece piece, Coordinate coordFrom, Coordinate coordTo, Piece capturedPiece) {
         this.piece = piece;
         this.coordFrom = coordFrom;
         this.coordTo = coordTo;
+        this.capturedPiece = capturedPiece;
         checkRep();
     }
     
@@ -101,5 +104,13 @@ public class Normal implements Move {
     @Override
     public int hashCode() {
         return piece.hashCode() + coordTo.hashCode() + coordFrom.hashCode();
+    }
+
+    @Override
+    public boolean isCapture() {
+        if (!capturedPiece.exists()) {return false;}
+        
+        // return true if capturing opposite color
+        return !(capturedPiece.color().equals(piece.color()));
     }
 }
