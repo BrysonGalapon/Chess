@@ -27,13 +27,14 @@ public class Board {
     // change heuristic in main so that rooks like open files, and that comp likes castling
     // add 'isUnprotected(Square square)' observer to check if a certain square on the board is unprotected
     // add 'getUnProtectedSquares()' observer
-    // add 'isCaptureMove' observer to Move
-    // add 'value' observer to Piece spec
     // add 'Set<Piece> canCapture(Square square, PieceColor side)' to obtain
     //        all pieces that the player on 'side' can capture a piece on square
     
     // Abstraction Function:
-    // TODO: Do this.
+    //  - represents a chess board filled with the squares in grid, such that the square
+    //     grid[x][y] 0 <= x, y < DEFAULT_SIZE is the square at Coordinate (x,y) on the chess board.
+    //  - turn is the side (white or black) to move next
+    //  - lastMove is the last move that was played in the game
     //  
     // Rep Invariant:
     //  - exactly two kings, one of opposite color, exist on the board
@@ -41,8 +42,10 @@ public class Board {
     //  - square at grid[x][y] has coordinate (x, y)
     // 
     // Safety from Rep Exposure:
-    // TODO: Finish this. 
-    // 
+    //  - all fields are private and final
+    //  - all mutable inputs are defensively copied
+    //  - all mutable outputs are defensively copied
+    //
 
     /**
      * Create a standard chess Board
@@ -86,9 +89,12 @@ public class Board {
         this.turn = turn;
         this.lastMove = null;
         
+        Map<Piece, Set<Coordinate>> whitePiecesCopy = new HashMap<>(whitePieces);
+        Map<Piece, Set<Coordinate>> blackPiecesCopy = new HashMap<>(blackPieces);
+        
         // add all the white pieces
-        for (Piece piece : whitePieces.keySet()) {
-            for (Coordinate coord : whitePieces.get(piece)) {
+        for (Piece piece : whitePiecesCopy.keySet()) {
+            for (Coordinate coord : whitePiecesCopy.get(piece)) {
                 Square square = getSquare(coord);
                 square.addPiece(piece);
                 grid[coord.getX()][coord.getY()] = square;
@@ -96,8 +102,8 @@ public class Board {
         }
         
         // add all the black pieces
-        for (Piece piece : blackPieces.keySet()) {
-            for (Coordinate coord : blackPieces.get(piece)) {
+        for (Piece piece : blackPiecesCopy.keySet()) {
+            for (Coordinate coord : blackPiecesCopy.get(piece)) {
                 Square square = getSquare(coord);
                 square.addPiece(piece);
                 grid[coord.getX()][coord.getY()] = square;
@@ -131,15 +137,9 @@ public class Board {
      */
     public void move(Move chessMove) throws IllegalArgumentException{
         Square squareFrom = getSquare(chessMove.coordFrom());
-        Piece pieceToMove = squareFrom.getPiece();
         
-        Square squareSource = getSquare(squareFrom.coordinate());
-        
-        if (! squareSource.isOccupied())
+        if (! squareFrom.isOccupied())
             throw new IllegalArgumentException("Piece not found");
-        
-        if (! squareSource.getPiece().equals(pieceToMove))
-            throw new IllegalArgumentException("Different piece is on that square");
         
         Set<Move> legalMoves = legalMoves();
         
@@ -266,7 +266,7 @@ public class Board {
                         
                         boolean pushedTwoSquares = Math.abs(coordTo.getY() - coordFrom.getY()) == 2;
                         int scalar = turn().equals(PieceColor.WHITE) ? 1 : -1;
-                        Square oneSquareAbove = getSquare(new Coordinate(coordFrom.getX(), coordFrom.getY()+1*scalar));
+                        Square oneSquareAbove = getSquare(coordFrom.getX(), coordFrom.getY()+1*scalar);
                        
                         // can't jump over pieces
                         if (pushedTwoSquares && oneSquareAbove.isOccupied()) {continue;}
@@ -386,19 +386,25 @@ public class Board {
     
     /**
      * Retrieve the square at the given coordinate
+     * @param x x-coordinate of square to obtain
+     * @param y y-coordinate of square to obtain
+     * @return the square at coordinate (x, y)
+     */
+    public Square getSquare(int x, int y) {
+        Square square = grid[x][y];
+        
+        return square.squareCopy();
+    }
+    
+    /**
+     * Retrieve the square at the given coordinate
      * @param coord coordinate of square to obtain
      * @return the square at coordinate coord
      */
     public Square getSquare(Coordinate coord) {
         Square square = grid[coord.getX()][coord.getY()];
         
-        Square squareCopy = new Square(coord);
-        
-        if (square.isOccupied()) {
-            squareCopy.addPiece(square.getPiece());
-        }
-        
-        return squareCopy;
+        return square.squareCopy();
     }
     
     /**
@@ -451,14 +457,7 @@ public class Board {
         
         Square square = grid[xCoordinate][yCoordinate];
         
-        Square squareCopy = new Square(square.coordinate());
-        
-        if (square.isOccupied()) {
-            squareCopy.addPiece(square.getPiece());
-        }
-            
-        checkRep();
-        return squareCopy;
+        return square.squareCopy();
     }
     
     /**
@@ -466,9 +465,12 @@ public class Board {
      * @param square to be placed on the chess board
      */
     public void setSquare(Square square) {
-        Coordinate coordinate = square.coordinate();
+        Square squareCopy = new Square(square.coordinate());
+        if (square.isOccupied()) {
+            squareCopy.addPiece(square.getPiece());
+        }
         
-        grid[coordinate.getX()][coordinate.getY()] = square;
+        forceSetSquare(squareCopy);
         checkRep();
     }
     
@@ -489,11 +491,12 @@ public class Board {
      * @param squareSet set of squares to place on this board
      */
     public void setSquareSet(Set<Square> squareSet) {
-        for (Square square : squareSet) {
+        Set<Square> squareSetCopy = new HashSet<>(squareSet);
+        
+        for (Square square : squareSetCopy) {
             forceSetSquare(square);
         }
     }
-    
     
     /**
      * Retrieve the string representation of this board, from white's perspective
@@ -675,8 +678,9 @@ public class Board {
      * @return the moves in moveSet that don't result in an illegal position via check
      */
     private Set<Move> filterChecks(Set<Move> moveSet) {
+        Set<Move> moveSetCopy = new HashSet<>(moveSet);
         Set<Move> filteredMoves = new HashSet<Move>();
-        for (Move move : moveSet) {
+        for (Move move : moveSetCopy) {
             
             // save the state of squares that will be changed
             Set<Square> squareState = new HashSet<>();
@@ -704,8 +708,10 @@ public class Board {
         Square squareFrom = getSquare(move.coordFrom());
         Square squareTo = getSquare(move.coordTo());
         Piece pieceToMove = squareFrom.getPiece();
+        PieceColor color = pieceToMove.color();
         
-        Coordinate coordinateTo = squareTo.coordinate();
+        Coordinate coordFrom = squareFrom.coordinate();
+        Coordinate coordTo = squareTo.coordinate();
         
         if (!squareFrom.isOccupied()) {
             throw new RuntimeException("No piece is there to move");
@@ -713,47 +719,48 @@ public class Board {
         
         squareFrom.removePiece();
         
-        Move lastMove = getLastMove();
-        
-        if (lastMove != null) {
-            if (!lastMove.isCastle()) {
-                Coordinate lastMoveCoordFrom = lastMove.coordFrom();
-                Coordinate lastMoveCoordTo = lastMove.coordTo();
-                Piece lastMovePiece = lastMove.movedPieces().iterator().next();
-                
-                boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
-                        Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
-                boolean pawnHadPushedAdjacentFile = lastMoveCoordFrom.getX() == move.coordTo().getX();
-                boolean pawnCanCapture = coordInBetween(lastMoveCoordFrom, lastMoveCoordTo).contains(move.coordTo());
-                boolean moveIsEnPassent = lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
-                
-                PieceColor color = pieceToMove.color();
-                if (moveIsEnPassent) {
-                    if (color.equals(PieceColor.WHITE)) {
-                        Square square = getSquare(new Coordinate(coordinateTo.getX(), coordinateTo.getY()-1));
-                        square.removePiece();
-                        setSquare(square);
-                    } else if (color.equals(PieceColor.BLACK)){
-                        Square square = getSquare(new Coordinate(coordinateTo.getX(), coordinateTo.getY()+1));
-                        square.removePiece();
-                        setSquare(square);
-                    } else {
-                        throw new RuntimeException("Color is not one of white or black");
-                    }
-                }
+        // take into account enPassent
+        if (isEnPassent(move)) {
+            if (color.equals(PieceColor.WHITE)) {
+                Square square = getSquare(coordTo.getX(), coordTo.getY()-1);
+                square.removePiece();
+                setSquare(square);
+            } else if (color.equals(PieceColor.BLACK)){
+                Square square = getSquare(coordTo.getX(), coordTo.getY()+1);
+                square.removePiece();
+                setSquare(square);
+            } else {
+                throw new RuntimeException("Color is not one of white or black");
             }
         }
-        
         
         pieceToMove = pieceToMove.getMovedVersion();
         
         squareTo.addPiece(pieceToMove);
         
-        Coordinate coordFrom = squareFrom.coordinate();
-        Coordinate coordTo = squareTo.coordinate();
-        
         grid[coordFrom.getX()][coordFrom.getY()] = squareFrom;
         grid[coordTo.getX()][coordTo.getY()] = squareTo;
+    }
+
+    /**
+     * Check if a move is an enPassent move
+     * @param move move to consider
+     * @return true if move is an enPassent capture
+     */
+    private boolean isEnPassent(Move move) {
+        Move lastMove = getLastMove();
+        if (lastMove == null || lastMove.isCastle()) {return false;}
+        
+        Coordinate lastMoveCoordFrom = lastMove.coordFrom();
+        Coordinate lastMoveCoordTo = lastMove.coordTo();
+        Piece lastMovePiece = lastMove.movedPieces().iterator().next();
+        
+        boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
+                Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
+        boolean pawnHadPushedAdjacentFile = lastMoveCoordFrom.getX() == move.coordTo().getX();
+        boolean pawnCanCapture = coordInBetween(lastMoveCoordFrom, lastMoveCoordTo).contains(move.coordTo());
+        
+        return lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
     }
     
     /**

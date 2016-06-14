@@ -27,6 +27,9 @@ public class SquareTest {
     //  - coordinate is on edge, coordinate is not on edge 
     //  - coordinate is in center, coordinate is not in center
     //
+    // squareCopy:
+    //  - square is on edge of board, square is in center
+    // 
     // isOccupied:
     //  - square is occupied, square is not occupied
     //   
@@ -37,6 +40,22 @@ public class SquareTest {
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testSquareCopyEdge() {
+        Square square = new Square(new Coordinate("h8"));
+        Square squareCopy = square.squareCopy();
+        
+        assertEquals("Expected copy of square to be equivalent to square", square, squareCopy);
+    }
+    
+    @Test
+    public void testSquareCopyCenter() {
+        Square square = new Square(new Coordinate("d4"));
+        Square squareCopy = square.squareCopy();
+        
+        assertEquals("Expected copy of square to be equivalent to square", square, squareCopy);
     }
     
     @Test

@@ -192,6 +192,30 @@ public class BoardTest {
     }
     
     @Test
+    public void testGetSquareOverloadEdge() {
+        Board board = new Board();
+        Square squareCoordinate = board.getSquare(new Coordinate(0, 1));
+        Square squareNotation = board.getSquare("a2");
+        Square squareXY = board.getSquare(0, 1);
+        
+        assertEquals("Expected equivalent squares to be equivalent", squareCoordinate, squareNotation);
+        assertEquals("Expected equivalent squares to be equivalent", squareNotation, squareXY);
+        assertEquals("Expected equivalent squares to be equivalent", squareXY, squareCoordinate);
+    }
+    
+    @Test
+    public void testGetSquareOverloadCenter() {
+        Board board = new Board();
+        Square squareCoordinate = board.getSquare(new Coordinate(3, 1));
+        Square squareNotation = board.getSquare("d2");
+        Square squareXY = board.getSquare(3, 1);
+        
+        assertEquals("Expected equivalent squares to be equivalent", squareCoordinate, squareNotation);
+        assertEquals("Expected equivalent squares to be equivalent", squareNotation, squareXY);
+        assertEquals("Expected equivalent squares to be equivalent", squareXY, squareCoordinate);
+    }
+    
+    @Test
     public void testFlipTurn() {
         Board board = new Board();
         board.flipTurn();

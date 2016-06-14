@@ -24,11 +24,23 @@ public class Square {
     //
     
     /**
-     * Crate an emptySquare
+     * Create an empty Square
      * @param coordinate coordinate at which this Square is located
      */
     public Square(Coordinate coordinate) {
         this.coordinate = coordinate;
+        this.occupied = false;
+        this.piece = new EmptyPiece();
+        checkRep();
+    }
+    
+    /**
+     * Create an empty Square
+     * @param x x-coordinate of square
+     * @param y y-coordinate of square
+     */
+    public Square(int x, int y) {
+        this.coordinate = new Coordinate(x, y);
         this.occupied = false;
         this.piece = new EmptyPiece();
         checkRep();
@@ -102,6 +114,18 @@ public class Square {
         return this.occupied;
     }
     
+    /**
+     * Obtain a new copy of this square
+     * @return a new copy of this square
+     */
+    public Square squareCopy() {
+        Square squareCopy = new Square(coordinate);
+        if (isOccupied()) {
+            squareCopy.addPiece(piece);
+        }
+        
+        return squareCopy;
+    }
     
     /**
      * Retrieve the string representation of this square
