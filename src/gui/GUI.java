@@ -107,7 +107,7 @@ public class GUI extends JFrame{
                 JButton button = new JButton();
                 button.setMargin(buttonMargin);
                 
-                Piece piece = board.getSquare(new Coordinate(7-row, 7-col)).getPiece();
+                Piece piece = board.getSquare(new Coordinate(row, 7-col)).getPiece();
                 
                 ImageIcon icon = new ImageIcon();
                 if (piece.exists()) {
