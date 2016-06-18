@@ -125,4 +125,9 @@ public class Bishop implements Piece {
     public int value() {
         return 3;
     }
+
+    @Override
+    public boolean isKing() {
+        return false;
+    }
 }

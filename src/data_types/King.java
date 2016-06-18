@@ -133,5 +133,10 @@ public class King implements Piece {
     public int value() {
         return 0;
     }
+
+    @Override
+    public boolean isKing() {
+        return true;
+    }
 }
 

@@ -33,7 +33,7 @@ public class EmptyPiece implements Piece {
 
     @Override
     public PieceColor color() {
-        throw new RuntimeException("Called operation on non-existent piece");
+        return PieceColor.TRANSPARENT;
     }
 
     @Override
@@ -76,5 +76,10 @@ public class EmptyPiece implements Piece {
     @Override
     public int value() {
         throw new RuntimeException("Called operation on non-existent piece");
+    }
+
+    @Override
+    public boolean isKing() {
+        return false;
     }
 }

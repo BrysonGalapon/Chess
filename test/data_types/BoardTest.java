@@ -138,6 +138,127 @@ public class BoardTest {
         assertEquals("Expected board copy to look the same as board", board.toString(), boardCopy.toString());
     }
     
+    @Test
+    public void testPerformance() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteQueenPlacement = new HashSet<>();
+        Set<Coordinate> whiteRookPlacement = new HashSet<>();
+        Set<Coordinate> whiteKnightPlacement = new HashSet<>();
+        Set<Coordinate> whiteBishopPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        
+        Set<Coordinate> unmovedWhiteBishopPlacement = new HashSet<>();
+        Set<Coordinate> unmovedWhitePawnPlacement = new HashSet<>();
+
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        Set<Coordinate> unmovedBlackQueenPlacement = new HashSet<>();
+        Set<Coordinate> unmovedBlackRookPlacement = new HashSet<>();
+        Set<Coordinate> unmovedBlackBishopPlacement = new HashSet<>();
+        Set<Coordinate> unmovedBlackPawnPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("g1"));
+        whiteQueenPlacement.add(new Coordinate("b3"));
+        whiteRookPlacement.add(new Coordinate("f1"));
+        whiteKnightPlacement.add(new Coordinate("f3"));
+        whiteBishopPlacement.add(new Coordinate("f7"));
+        whitePawnPlacement.add(new Coordinate("d4"));
+        
+        unmovedWhiteBishopPlacement.add(new Coordinate("c1"));
+        unmovedWhitePawnPlacement.add(new Coordinate("a2"));
+        unmovedWhitePawnPlacement.add(new Coordinate("f2"));
+        unmovedWhitePawnPlacement.add(new Coordinate("g2"));
+        unmovedWhitePawnPlacement.add(new Coordinate("h2"));
+
+        blackKingPlacement.add(new Coordinate("f8"));
+        blackKnightPlacement.add(new Coordinate("c6"));
+        blackBishopPlacement.add(new Coordinate("a1"));
+        
+        unmovedBlackQueenPlacement.add(new Coordinate("d8"));
+        unmovedBlackRookPlacement.add(new Coordinate("a8"));
+        unmovedBlackRookPlacement.add(new Coordinate("h8"));
+        unmovedBlackBishopPlacement.add(new Coordinate("c8"));
+        unmovedBlackPawnPlacement.add(new Coordinate("a7"));
+        unmovedBlackPawnPlacement.add(new Coordinate("b7"));
+        unmovedBlackPawnPlacement.add(new Coordinate("c7"));
+        unmovedBlackPawnPlacement.add(new Coordinate("d7"));
+        unmovedBlackPawnPlacement.add(new Coordinate("g7"));
+        unmovedBlackPawnPlacement.add(new Coordinate("h7"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.queen(white, true), whiteQueenPlacement);
+        whitePieces.put(Piece.rook(white, true), whiteRookPlacement);
+        whitePieces.put(Piece.knight(white, true), whiteKnightPlacement);
+        whitePieces.put(Piece.bishop(white, true), whiteBishopPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        
+        whitePieces.put(Piece.bishop(white, false), unmovedWhiteBishopPlacement);
+        whitePieces.put(Piece.pawn(white, false), unmovedWhitePawnPlacement);
+        
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        
+        blackPieces.put(Piece.queen(black, false), unmovedBlackQueenPlacement);
+        blackPieces.put(Piece.rook(black, false), unmovedBlackRookPlacement);
+        blackPieces.put(Piece.bishop(black, false), unmovedBlackBishopPlacement);
+        blackPieces.put(Piece.pawn(black, false), unmovedBlackPawnPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        double constructorStartTime = System.currentTimeMillis();
+        Board board = new Board(whitePieces, blackPieces, turn);
+        double constructorLength = System.currentTimeMillis() - constructorStartTime;
+        
+        double blackPiecesStartTime = System.currentTimeMillis();
+        board.blackPieces();
+        double blackPiecesLength = System.currentTimeMillis() - blackPiecesStartTime;
+        
+        double whitePiecesStartTime = System.currentTimeMillis();
+        board.whitePieces();
+        double whitePiecesLength = System.currentTimeMillis() - whitePiecesStartTime;
+        
+        double createMoveStartTime = System.currentTimeMillis();
+        Move move = Move.createMove(board.getSquare("c1"), board.getSquare("g5"));
+        double createMoveLength = System.currentTimeMillis() - createMoveStartTime;
+        
+        double moveStartTime = System.currentTimeMillis();
+        board.move(move);
+        double moveLength = System.currentTimeMillis() - moveStartTime;
+        
+        double legalMovesStartTime = System.currentTimeMillis();
+        board.legalMoves();
+        double legalMovesLength = System.currentTimeMillis() - legalMovesStartTime;
+        
+        double checkMateStartTime = System.currentTimeMillis();
+        board.checkMate();
+        double checkMateLength = System.currentTimeMillis() - checkMateStartTime;
+        
+        Square givenSquare = new Square(new Coordinate("b3"));
+        givenSquare.addPiece(Piece.queen(white, true));
+        double setSquareStartTime = System.currentTimeMillis();
+        board.setSquare(givenSquare);
+        double setSquareLength = System.currentTimeMillis() - setSquareStartTime;
+        
+        System.out.println("Performance Report: (ms)\n");
+        System.out.println("Constructor: " + constructorLength);
+        System.out.println("Black Pieces: " + blackPiecesLength);
+        System.out.println("White Pieces: " + whitePiecesLength);
+        System.out.println("Create Move: " + createMoveLength);
+        System.out.println("Move: " + moveLength);
+        System.out.println("Legal Moves: " + legalMovesLength);
+        System.out.println("CheckMate: " + checkMateLength);
+        System.out.println("SetSquare: " + setSquareLength);
+    }
+    
     // Testing Strategy:
     // 
     // move:
@@ -1119,9 +1240,9 @@ public class BoardTest {
         Board board = new Board(whitePieces, blackPieces, turn);
         
         Set<Move> legalMoves = board.legalMoves();
-        
+
         assertEquals("Expected 3 ways to block with queen", 3, legalMoves.size());
-    
+        
         Move move1 = Move.createMove(board.getSquare("c7"), board.getSquare("g7"));
         Move move2 = Move.createMove(board.getSquare("c7"), board.getSquare("e5"));
         Move move3 = Move.createMove(board.getSquare("c7"), board.getSquare("c3"));

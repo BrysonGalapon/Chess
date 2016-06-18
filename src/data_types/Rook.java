@@ -119,4 +119,9 @@ public class Rook implements Piece {
     public int value() {
         return 5;
     }
+
+    @Override
+    public boolean isKing() {
+        return false;
+    }
 }

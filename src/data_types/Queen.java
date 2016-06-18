@@ -108,4 +108,9 @@ public class Queen implements Piece {
     public int value() {
         return 9;
     }
+
+    @Override
+    public boolean isKing() {
+        return false;
+    }
 }

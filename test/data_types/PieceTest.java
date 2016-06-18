@@ -61,6 +61,16 @@ public class PieceTest {
     //  - piece is a bishop, piece is not a bishop
     //  - piece is a queen, piece is not a queen
     //
+    // isKing:
+    //  - piece is a pawn, piece is not a pawn
+    //  - piece is a king, piece is not a king
+    //  - piece is a knight, piece is not a knight
+    //  - piece is a rook, piece is not a rook
+    //  - piece is a bishop, piece is not a bishop
+    //  - piece is a queen, piece is not a queen    
+    //  - piece is moved, piece is unmoved
+    //  - piece is white, piece is black
+    //
     // color: 
     //  - piece is a pawn, piece is not a pawn
     // 
@@ -92,6 +102,30 @@ public class PieceTest {
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testIsKing() {
+        Piece pawn = Piece.pawn(PieceColor.WHITE, true);
+        Piece rook = Piece.rook(PieceColor.BLACK, true);
+        Piece knight = Piece.knight(PieceColor.WHITE, false);
+        Piece bishop = Piece.bishop(PieceColor.BLACK, false);
+        Piece queen = Piece.queen(PieceColor.WHITE, false);
+        Piece movedWhiteKing = Piece.king(PieceColor.WHITE, true);
+        Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
+        Piece movedBlackKing = Piece.king(PieceColor.BLACK, true);
+        Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
+
+        
+        assertFalse("Expected pawn to not be a king", pawn.isKing());
+        assertFalse("Expected rook to not be a king", rook.isKing());
+        assertFalse("Expected knight to not be a king", knight.isKing());
+        assertFalse("Expected bishop to not be king", bishop.isKing());
+        assertFalse("Expected queen to not be king", queen.isKing());
+        assertTrue("Expected unmoved white king to be a king", unmovedWhiteKing.isKing());
+        assertTrue("Expected moved white king to be a king", movedWhiteKing.isKing());
+        assertTrue("Expected unmoved black king to be a king", unmovedBlackKing.isKing());
+        assertTrue("Expected moved black king to be a king", movedBlackKing.isKing());
     }
     
     @Test

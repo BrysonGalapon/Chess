@@ -123,4 +123,9 @@ public class Pawn implements Piece {
     public int value() {
         return 1;
     }
+
+    @Override
+    public boolean isKing() {
+        return false;
+    }
 }

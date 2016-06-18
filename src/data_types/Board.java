@@ -95,18 +95,14 @@ public class Board {
         // add all the white pieces
         for (Piece piece : whitePiecesCopy.keySet()) {
             for (Coordinate coord : whitePiecesCopy.get(piece)) {
-                Square square = getSquare(coord);
-                square.addPiece(piece);
-                grid[coord.getX()][coord.getY()] = square;
+                grid[coord.getX()][coord.getY()].addPiece(piece);
             }
         }
         
         // add all the black pieces
         for (Piece piece : blackPiecesCopy.keySet()) {
             for (Coordinate coord : blackPiecesCopy.get(piece)) {
-                Square square = getSquare(coord);
-                square.addPiece(piece);
-                grid[coord.getX()][coord.getY()] = square;
+                grid[coord.getX()][coord.getY()].addPiece(piece);
             }
         }
         
@@ -132,29 +128,25 @@ public class Board {
     
     /**
      * Make a chess move on this Board. Flips the side to move.
+     *  - requires that chessMove is contained in this.legalMoves()
      * @param chessMove move to make on this board
-     * @throws IllegalArgumentException if this move is illegal
      */
-    public void move(Move chessMove) throws IllegalArgumentException{
+    public void move(Move chessMove) {
         Square squareFrom = getSquare(chessMove.coordFrom());
         
         if (! squareFrom.isOccupied())
             throw new IllegalArgumentException("Piece not found");
         
-        Set<Move> legalMoves = legalMoves();
+        assert legalMoves().contains(chessMove);
         
-        if (legalMoves.contains(chessMove)) {
-            movePiece(chessMove);
+        movePiece(chessMove);
             
-            if (chessMove.isCastle()) {
-                Coordinate rookCoord = getRookCoordinate(chessMove.coordTo());
-                Square rookSquareFrom = getSquare(rookCoord);
-                Square rookSquareTo = getSquare(getRookDestination(rookCoord));
-                Move rookMove = Move.createMove(rookSquareFrom, rookSquareTo);
-                movePiece(rookMove);
-            }
-        } else {
-            throw new IllegalArgumentException("Move is illegal");
+        if (chessMove.isCastle()) {
+            Coordinate rookCoord = getRookCoordinate(chessMove.coordTo());
+            Square rookSquareFrom = getSquare(rookCoord);
+            Square rookSquareTo = getSquare(getRookDestination(rookCoord));
+            Move rookMove = Move.createMove(rookSquareFrom, rookSquareTo);
+            movePiece(rookMove);
         }
         
         this.lastMove = chessMove;
@@ -163,7 +155,7 @@ public class Board {
     }
     
    /**
-    * Retrieve the placement of all black pieces currently on the board
+    * Retrieve the placement of all existing black pieces currently on the board
     * @return a map that maps a particular black piece to all the coordinates that contains that piece 
     */
     public Map<Piece, Set<Coordinate>> blackPieces() {
@@ -194,7 +186,7 @@ public class Board {
     }
     
     /**
-     * Retrieve the placement of all white pieces currently on the board
+     * Retrieve the placement of all existing white pieces currently on the board
      * @return a map that maps a particular white piece to all the coordinates that contains that piece 
      */
      public Map<Piece, Set<Coordinate>> whitePieces() {
@@ -237,6 +229,7 @@ public class Board {
      * @return a set of all legal moves the current player has
      */
     public Set<Move> legalMoves() {
+        
         Set<Move> legalMoves = new HashSet<>();
         
         Map<Piece, Set<Coordinate>> pieces;
@@ -251,103 +244,73 @@ public class Board {
         
         for (Piece piece : pieces.keySet()) {
             for (Coordinate coordFrom : pieces.get(piece)) {
-                Set<Coordinate> moveSet = piece.moveSet(coordFrom);
-                for (Coordinate coordTo : moveSet) {
+                Map<Direction, Coordinate> farthestCoordinateCleared = new HashMap<>();
+                
+                for (Coordinate coordTo : piece.moveSet(coordFrom)) {
+                    Square squareFrom = getSquare(coordFrom);
                     Square squareTo = getSquare(coordTo);
+                    Piece squareFromPiece = squareFrom.getPiece();
+                    Piece squareToPiece = squareTo.getPiece();
                     
-                    if (squareTo.isOccupied()) {
-                        // can't land on a spot that contains same color
-                        if (squareTo.getPiece().color().equals(turn())) {continue;}
-                        }
+                    // can't land on a square which contains a piece of the same color
+                    if (squareToPiece.color().equals(turn())) {continue;}
                     
                     if (piece.isPawn()) {
                         // can't push a pawn to land on a piece
                         if (squareTo.isOccupied() && coordFrom.getX() == coordTo.getX()) {continue;}
-                        
-                        boolean pushedTwoSquares = Math.abs(coordTo.getY() - coordFrom.getY()) == 2;
-                        int scalar = turn().equals(PieceColor.WHITE) ? 1 : -1;
-                        Square oneSquareAbove = getSquare(coordFrom.getX(), coordFrom.getY()+1*scalar);
                        
                         // can't jump over pieces
-                        if (pushedTwoSquares && oneSquareAbove.isOccupied()) {continue;}
+                        if (pawnJumpedOverPiece(coordFrom, coordTo)) {continue;}
+                        
+                        Move move = Move.createMove(getSquare(coordFrom), getSquare(coordTo));
                         
                         boolean isCaptureMove = coordTo.getX() != coordFrom.getX();
-                        boolean moveIsEnPassent = false;
-                        Move lastMove = getLastMove();
-                        if (lastMove != null && !lastMove.isCastle()) {
-                            Piece lastMovePiece = lastMove.movedPieces().iterator().next(); // remove arbitrary element from moved pieces (size is 1, so should be okay)
-                            Coordinate lastMoveCoordFrom = lastMove.coordFrom();
-                            Coordinate lastMoveCoordTo = lastMove.coordTo();
-                            
-                            boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
-                                                              Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
-                            boolean pawnHadPushedAdjacentFile = lastMoveCoordFrom.getX() == coordTo.getX();
-                            boolean pawnCanCapture = coordInBetween(lastMoveCoordFrom, lastMoveCoordTo).contains(coordTo);
-                            moveIsEnPassent = lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
-                            
-                            if (isCaptureMove && !squareTo.isOccupied() && !moveIsEnPassent) {continue;}
-                        }
+                        boolean isEnPassent = isEnPassent(move);
                         
-                        if (moveIsEnPassent) {
-                            legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
-                            continue;
-                        }
+                        // can't capture on an unoccupied square
+                        if (!isEnPassent && isCaptureMove && !squareTo.isOccupied()) {continue;}
                         
-                        if (isCaptureMove && !squareTo.isOccupied()) {continue;}
-                        
-                        legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
+                        legalMoves.add(move);
                     } else {
                         Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
                         Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
                         boolean pieceIsUnmovedKing = piece.equals(unmovedWhiteKing) || piece.equals(unmovedBlackKing);
-                        if (pieceIsUnmovedKing) {
-                            boolean moveIsCastlingMove = Math.abs(coordTo.getX() - coordFrom.getX()) == 2;
-                            
-                            if (moveIsCastlingMove) {
-                                Coordinate rookCoord = getRookCoordinate(coordTo);
-                                
-                                // squares between king and rook must be clear
-                                if (!squaresCleared(coordFrom, rookCoord)) {continue;}
-                                // rook may not be there
-                                if (!getSquare(rookCoord).isOccupied()) {continue;}
-                                // rook may not have moved before
-                                if (getSquare(rookCoord).getPiece().hasMoved()) {continue;}
-                                // king may not castle out of, through, or into check
-                                if (!kingAvoidsCheck(coordFrom, coordTo)) {continue;}
-                                
-                                legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
-                                continue;
-                            }
-                        }
+                        boolean moveIsCastlingMove = pieceIsUnmovedKing && Math.abs(coordTo.getX() - coordFrom.getX()) == 2;
                         
-                        List<Coordinate> inBetween = coordInBetween(coordFrom, coordTo);
-                        // TODO: Optimize this check using dynamic programming
-                        boolean isValidMove = true;
-                        for (int i = 0; i < inBetween.size(); i++) {
-                            Coordinate coord = inBetween.get(i);
-                            Square square = getSquare(coord);
-                            if (getSquare(coord).isOccupied()) {
-                                Piece pieceOnBoard = square.getPiece();
-                                if (pieceOnBoard.color().equals(turn())) {
-                                    // found a piece that is of the same color
-                                    isValidMove = false;
-                                    break;
-                                } else {
-                                    // found a piece that is the opposite color
-                                    if (i == inBetween.size()-1) { // at end of list?
-                                        isValidMove = true;
-                                    } else {
-                                        // not at end, can't jump over pieces
-                                        isValidMove = false;
-                                        break;
-                                    }
+                        if (moveIsCastlingMove) {
+                            Coordinate rookCoord = getRookCoordinate(coordTo);
+                            Square rookSquare = getSquare(rookCoord);
+                            
+                            // can't castle without a rook
+                            if (!rookSquare.isOccupied()) {continue;}
+                            // squares between king and rook must be clear
+                            if (!squaresCleared(coordFrom, rookCoord)) {continue;}
+                            // rook may not have moved before
+                            if (rookSquare.getPiece().hasMoved()) {continue;}
+                            // king may not castle out of, through, or into check
+                            if (!kingAvoidsCheck(coordFrom, coordTo)) {continue;}
+                        } else {
+                            
+                            Direction direction = getCardinalDirection(coordFrom, coordTo);
+
+                            if (!farthestCoordinateCleared.keySet().contains(direction)) {
+                                if (!squaresCleared(coordFrom, coordTo)) {continue;}
+                                farthestCoordinateCleared.put(direction, coordTo);
+                            } else {
+                                Coordinate farthestCoord = farthestCoordinateCleared.get(direction);
+                                
+                                if (fartherAway(coordFrom, coordTo, farthestCoord).equals(coordTo)) {
+                                    if (!squaresCleared(farthestCoord, coordTo)) {continue;}
+                                    
+                                    farthestCoordinateCleared.put(direction, coordTo);
                                 }
                             }
+                            
+                            // can't land on same color piece
+                            if (squareToPiece.color().equals(squareFromPiece.color())) {continue;}
                         }
                         
-                        if (isValidMove) {
-                            legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
-                        }
+                        legalMoves.add(Move.createMove(getSquare(coordFrom), getSquare(coordTo)));
                     }
                 }
             }
@@ -358,7 +321,7 @@ public class Board {
         checkRep();
         return legalMoves;
     }
-
+    
     /**
      * Check if the current player is in checkmate
      * @return true if the current player is in checkmate
@@ -546,6 +509,45 @@ public class Board {
     //////////////////////////////////////////////////////////////////////
     
     /**
+     * Retrieve the coordinate furthest away from a point
+     * @param coordFrom reference coordinate
+     * @param coordEnd1 first end coordinate
+     * @param coordEnd2 second end coordinate
+     * @return which of coordEnd1 or coordEnd2 that is furthest in Euclidean distance
+     *          away from coordFrom
+     *           - if coordEnd1 and coordEnd2 are the same distance from coordFrom,
+     *              return coordEnd2 arbitrarily
+     */
+    private Coordinate fartherAway(Coordinate coordFrom, Coordinate coordEnd1, Coordinate coordEnd2) {
+        int xStart = coordFrom.getX();
+        int yStart = coordFrom.getY();
+        int xEnd1 = coordEnd1.getX();
+        int yEnd1 = coordEnd1.getY();
+        int xEnd2 = coordEnd2.getX();
+        int yEnd2 = coordEnd2.getY();
+        
+        double distance1 = Math.pow(xStart - xEnd1, 2) + Math.pow(yStart - yEnd1, 2);
+        double distance2 = Math.pow(xStart - xEnd2, 2) + Math.pow(yStart - yEnd2, 2);
+        
+        return distance1 > distance2 ? coordEnd1 : coordEnd2; 
+    }
+    
+    /**
+     * Check if a pawn jumps over a piece
+     *      - requires that coordFrom and coordTo share a file (i.e. coordFrom.getX() == coordTo.getX())
+     * @param coordFrom starting coordinate of pawn
+     * @param coordTo ending coordinate of pawn
+     * @return true if this pawn jumped over a piece
+     */
+    private boolean pawnJumpedOverPiece(Coordinate coordFrom, Coordinate coordTo) {
+        boolean pushedTwoSquares = Math.abs(coordTo.getY() - coordFrom.getY()) == 2;
+        int scalar = turn().equals(PieceColor.WHITE) ? 1 : -1;
+        Square oneSquareAbove = getSquare(coordFrom.getX(), coordFrom.getY()+1*scalar);
+        
+        return pushedTwoSquares && oneSquareAbove.isOccupied();
+    }
+    
+    /**
      * Retrieve the rook coordinate destination when castling 
      * @param coordFrom coordinate that the rook is being moved from when castling
      * @return the coordinate the rook will land on after castling
@@ -628,6 +630,40 @@ public class Board {
     }
     
     /**
+     * Obtain the cardinal direction that a vector points in
+     *   - requires that coordFrom and coordTo share a diagonal, row, or column
+     *     on a grid
+     *   - requires that coordFrom != coordTo
+     * @param coordFrom starting coordinate of vector
+     * @param coordTo ending coordinate of vector
+     * @return the cardinal direction that the vector formed from coordTo - coordFrom points in
+     */
+    private Direction getCardinalDirection(Coordinate coordFrom, Coordinate coordTo) {
+        int xStart = coordFrom.getX();
+        int yStart = coordFrom.getY();
+        int xEnd = coordTo.getX();
+        int yEnd = coordTo.getY();
+        
+        if (xStart == xEnd) { // coordinates share a column
+            return yStart < yEnd ? Direction.NORTH : Direction.SOUTH;
+        } else if (yStart == yEnd) { // coordinates share a row
+            return xStart < xEnd ? Direction.EAST : Direction.WEST;
+        } else { // coordinates share a diagonal
+            if (xStart < xEnd && yStart < yEnd) {
+                return Direction.NORTH_EAST;
+            } else if (xStart > xEnd && yStart < yEnd) {
+                return Direction.NORTH_WEST;
+            } else if (xStart < xEnd && yStart > yEnd) {
+                return Direction.SOUTH_EAST;
+            } else if (xStart > xEnd && yStart > yEnd) {
+                return Direction.SOUTH_WEST;
+            } else {
+                throw new IllegalArgumentException("coordFrom and coordTo must share a column, row, or diagonal");
+            }
+        }
+    }
+    
+    /**
      * Retrieve the piece of color color on this board
      * @param color color of king to retrieve
      * @return the king of this color on this board
@@ -656,7 +692,7 @@ public class Board {
         }
         
         if (pieces.keySet().contains(unmovedKing)) {
-            unmovedKingOnBoard = pieces.get(unmovedKing).size() == 1;
+            unmovedKingOnBoard = pieces.get(unmovedKing).size() == 1; 
         } else {
             unmovedKingOnBoard = false;
         }
@@ -678,9 +714,8 @@ public class Board {
      * @return the moves in moveSet that don't result in an illegal position via check
      */
     private Set<Move> filterChecks(Set<Move> moveSet) {
-        Set<Move> moveSetCopy = new HashSet<>(moveSet);
         Set<Move> filteredMoves = new HashSet<Move>();
-        for (Move move : moveSetCopy) {
+        for (Move move : moveSet) {
             
             // save the state of squares that will be changed
             Set<Square> squareState = new HashSet<>();
@@ -722,13 +757,9 @@ public class Board {
         // take into account enPassent
         if (isEnPassent(move)) {
             if (color.equals(PieceColor.WHITE)) {
-                Square square = getSquare(coordTo.getX(), coordTo.getY()-1);
-                square.removePiece();
-                setSquare(square);
+                grid[coordTo.getX()][coordTo.getY()-1].removePiece();
             } else if (color.equals(PieceColor.BLACK)){
-                Square square = getSquare(coordTo.getX(), coordTo.getY()+1);
-                square.removePiece();
-                setSquare(square);
+                grid[coordTo.getX()][coordTo.getY()+1].removePiece();
             } else {
                 throw new RuntimeException("Color is not one of white or black");
             }
@@ -748,6 +779,9 @@ public class Board {
      * @return true if move is an enPassent capture
      */
     private boolean isEnPassent(Move move) {
+        Coordinate coordFrom = move.coordFrom();
+        Coordinate coordTo = move.coordTo();
+        
         Move lastMove = getLastMove();
         if (lastMove == null || lastMove.isCastle()) {return false;}
         
@@ -757,8 +791,11 @@ public class Board {
         
         boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
                 Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
-        boolean pawnHadPushedAdjacentFile = lastMoveCoordFrom.getX() == move.coordTo().getX();
-        boolean pawnCanCapture = coordInBetween(lastMoveCoordFrom, lastMoveCoordTo).contains(move.coordTo());
+        boolean pawnHadPushedAdjacentFile = Math.abs(lastMoveCoordFrom.getX() - coordFrom.getX()) == 1;
+        
+        int scalar = (turn().equals(PieceColor.WHITE)) ? 1 : -1;
+        // pawn should capture into the square between lastMoveCoordFrom and lastMoveCoordTo
+        boolean pawnCanCapture = new Coordinate(lastMoveCoordFrom.getX(), lastMoveCoordFrom.getY()-scalar).equals(coordTo);
         
         return lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
     }
@@ -771,6 +808,27 @@ public class Board {
         for(Square square : squareState) {
             grid[square.coordinate().getX()][square.coordinate().getY()] = square;
         }
+    }
+    
+    /**
+     * Check if a coordinate is strictly in between two other coordinates
+     * @param x x-coordinate of point to check
+     * @param y y-coordinate of point to check
+     * @param xStart x-coordinate of source node
+     * @param yStart y-coordinate of source node
+     * @param xEnd x-coordinate of end node
+     * @param yEnd y-coordinate of end node
+     * @return true if (x, y) lies on the line drawn between (xStart, yStart)
+     *          and (xEnd, yEnd) on the plane
+     */
+    private boolean liesInBetween(int x, int y, int xStart, int yStart, int xEnd, int yEnd) {
+        if ((xStart >= x || x >= xEnd) && (xEnd >= x || x >= xStart)) {return false;}
+        if ((yStart >= y || y >= yEnd) && (yEnd >= y || y >= yStart)) {return false;}
+
+        double m1 = (y - yStart)/(x - xStart);
+        double m2 = (y - yEnd)/(x - xEnd);
+        
+        return m1 == m2;
     }
     
     /**
@@ -936,21 +994,7 @@ public class Board {
             } else {
                 for (Coordinate coordFrom : otherPieces.get(piece)) {
                     for (Coordinate coordTo : piece.moveSet(coordFrom)) {
-                        boolean isLegalMove = true;
-                        // TODO: Optimize using dynamic programming here too
-                        List<Coordinate> inBetween = coordInBetween(coordFrom, coordTo);
-                        for (int i = 0; i < inBetween.size(); i++) {
-                            Coordinate coordInBetween = inBetween.get(i);
-                            if (i != inBetween.size()-1 && getSquare(coordInBetween).isOccupied()) {
-                                isLegalMove = false;
-                                break;
-                            }
-                        }
-                        
-                        if (!isLegalMove) {
-                            continue;
-                        }
-                        
+                        if (!squaresCleared(coordFrom, coordTo)) {continue;}
                         if (coordTo.equals(currentKingCoord)) {
                             return true;
                         }

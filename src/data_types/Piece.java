@@ -14,45 +14,92 @@ public interface Piece {
     //         Queen(moved:boolean, color:PieceColor) + Rook(moved:boolean, color:PieceColor) +
     //         EmptyPiece()
     
-    /**Create a new pawn with color color
-     * @param moved whether or not this pawn has moved
+    /**
+     * Create a new pawn with color color
+     * @param color color of piece
+     *          - requires !color.equals(PieceColor.TRANSPARENT)
+     * @param moved whether of not this piece has moved
+     * @return a pawn with color color that has (or has not) moved
      */
     public static Piece pawn(PieceColor color, boolean moved) {
+        if (color.equals(PieceColor.TRANSPARENT)) {
+            throw new IllegalArgumentException("Can't make a transparent piece!");
+        }
         return new Pawn(color, moved);
     }
     
-    /**Create a new knight with color color
+    /**
+     * Create a new knight with color color
+     * @param color color of piece
+     *          - requires !color.equals(PieceColor.TRANSPARENT)
+     * @param moved whether of not this piece has moved
+     * @return a knight with color color that has (or has not) moved
      */
     public static Piece knight(PieceColor color, boolean moved) {
+        if (color.equals(PieceColor.TRANSPARENT)) {
+            throw new IllegalArgumentException("Can't make a transparent piece!");
+        }
         return new Knight(color, moved);
     }
     
-    /**Create a new bishop with color color
+    /**
+     * Create a new bishop with color color
+     * @param color color of piece
+     *          - requires !color.equals(PieceColor.TRANSPARENT)
+     * @param moved whether of not this piece has moved
+     * @return a bishop with color color that has (or has not) moved
      */
     public static Piece bishop(PieceColor color, boolean moved) {
+        if (color.equals(PieceColor.TRANSPARENT)) {
+            throw new IllegalArgumentException("Can't make a transparent piece!");
+        }
         return new Bishop(color, moved);
     }
     
-    /**Create a new rook with color color
+    /**
+     * Create a new rook with color color
+     * @param color color of piece
+     *          - requires !color.equals(PieceColor.TRANSPARENT)
+     * @param moved whether of not this piece has moved
+     * @return a rook with color color that has (or has not) moved
      */
     public static Piece rook(PieceColor color, boolean moved) {
+        if (color.equals(PieceColor.TRANSPARENT)) {
+            throw new IllegalArgumentException("Can't make a transparent piece!");
+        }
         return new Rook(color, moved);
     }
     
-    /**Create a new queen with color color
+    /**
+     * Create a new queen with color color
+     * @param color color of piece
+     *          - requires !color.equals(PieceColor.TRANSPARENT)
+     * @param moved whether of not this piece has moved
+     * @return a queen with color color that has (or has not) moved
      */
     public static Piece queen(PieceColor color, boolean moved) {
+        if (color.equals(PieceColor.TRANSPARENT)) {
+            throw new IllegalArgumentException("Can't make a transparent piece!");
+        }
         return new Queen(color, moved);
     }
     
-    /**Create a new king with color color
+    /**
+     * Create a new king with color color
+     * @param color color of piece
+     *          - requires !color.equals(PieceColor.TRANSPARENT)
+     * @param moved whether of not this piece has moved
+     * @return a king with color color that has (or has not) moved
      */
     public static Piece king(PieceColor color, boolean moved) {
+        if (color.equals(PieceColor.TRANSPARENT)) {
+            throw new IllegalArgumentException("Can't make a transparent piece!");
+        }
         return new King(color, moved);
     }
     
     /**
-     * Check if this pawn has moved or not
+     * Check if this piece has moved or not
      * @return true if this pawn has moved
      */
     public boolean hasMoved();
@@ -77,6 +124,7 @@ public interface Piece {
     /**
      * Retrieve the color of this piece
      * @return the color of this piece
+     *            - if this piece does not exist, return PieceColor.TRANSPARENT
      */
     public PieceColor color();
     
@@ -91,6 +139,12 @@ public interface Piece {
      * @return true if this piece is a pawn
      */
     public boolean isPawn();
+    
+    /**
+     * Check if this piece is a king
+     * @return true if this piece is a king
+     */
+    public boolean isKing();
     
     /**
      * Retrieve the value of this piece 
