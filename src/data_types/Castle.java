@@ -80,7 +80,7 @@ public class Castle implements Move{
     }
     
     @Override
-    public Set<Coordinate> coordinatesChanged() {
+    public Set<Coordinate> coordinatesChanged(Board board) {
         Set<Coordinate> coordsChanged = new HashSet<>();
         int rookY = (turnSide.equals(PieceColor.WHITE)) ? 0 : Board.DEFAULT_SIZE-1; 
         int rookFromX = (castleSide.equals(CastleSide.KINGSIDE)) ? Board.DEFAULT_SIZE-1 : 0; // 0-indexed y-placement of king

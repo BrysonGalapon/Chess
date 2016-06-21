@@ -41,6 +41,25 @@ public class MoveTest {
     }
     
     @Test
+    public void testCoordinatesChangedEnPassent() {
+        Board board = new Board();
+        
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a6")));
+        board.move(Move.createMove(board.getSquare("e4"), board.getSquare("e5")));
+        board.move(Move.createMove(board.getSquare("f7"), board.getSquare("f5")));
+        
+        Move enPassent = Move.createMove(board.getSquare("e5"), board.getSquare("f6"));
+        
+        Set<Coordinate> expectedCoordinatesChanged = new HashSet<>();
+        expectedCoordinatesChanged.add(new Coordinate("e5"));
+        expectedCoordinatesChanged.add(new Coordinate("f5"));
+        expectedCoordinatesChanged.add(new Coordinate("f6"));
+
+        assertEquals("Expected en passent to change f6 square", expectedCoordinatesChanged, enPassent.coordinatesChanged(board));
+    }
+    
+    @Test
     public void testIsCaptureCastle() {
         Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
         Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
@@ -88,20 +107,22 @@ public class MoveTest {
     
     @Test
     public void testCoordinatesChangedCastle() {
-        Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
-        Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
         
-        Square squareFromWhite = new Square(new Coordinate("e1"));
-        Square squareFromBlack = new Square(new Coordinate("e8"));
+        Board board = new Board();
         
-        Square squareToWhite = new Square(new Coordinate("g1"));
-        Square squareToBlack = new Square(new Coordinate("c8"));
-        
-        squareFromWhite.addPiece(unmovedWhiteKing);
-        squareFromBlack.addPiece(unmovedBlackKing);
-        
-        Move whiteCastleKingside = Move.createMove(squareFromWhite, squareToWhite);
-        Move blackCastleQueenside = Move.createMove(squareFromBlack, squareToBlack);
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("d7"), board.getSquare("d5")));
+        board.move(Move.createMove(board.getSquare("g1"), board.getSquare("f3")));
+        board.move(Move.createMove(board.getSquare("b8"), board.getSquare("c6")));
+        board.move(Move.createMove(board.getSquare("f1"), board.getSquare("e2")));
+        board.move(Move.createMove(board.getSquare("c8"), board.getSquare("e6")));
+        board.move(Move.createMove(board.getSquare("a2"), board.getSquare("a3")));
+        board.move(Move.createMove(board.getSquare("d8"), board.getSquare("d7")));
+
+        Move whiteCastleKingside = Move.createMove(board.getSquare("e1"), board.getSquare("g1"));
+        board.flipTurn();
+        Move blackCastleQueenside = Move.createMove(board.getSquare("e8"), board.getSquare("c8"));
+        board.flipTurn();
         
         Set<Coordinate> expectedCoordinatesChangedWhite = new HashSet<>();
         Set<Coordinate> expectedCoordinatesChangedBlack = new HashSet<>();
@@ -115,9 +136,9 @@ public class MoveTest {
         expectedCoordinatesChangedBlack.add(new Coordinate("c8"));
         expectedCoordinatesChangedBlack.add(new Coordinate("a8"));
         expectedCoordinatesChangedBlack.add(new Coordinate("d8"));
-
-        assertEquals("Expected correct changed coordinates for white castling kingside", expectedCoordinatesChangedWhite, whiteCastleKingside.coordinatesChanged());
-        assertEquals("Expected correct changed coordinates for black castling queenside", expectedCoordinatesChangedBlack, blackCastleQueenside.coordinatesChanged());
+        
+        assertEquals("Expected correct changed coordinates for white castling kingside", expectedCoordinatesChangedWhite, whiteCastleKingside.coordinatesChanged(board));
+        assertEquals("Expected correct changed coordinates for black castling queenside", expectedCoordinatesChangedBlack, blackCastleQueenside.coordinatesChanged(board));
     }
     
     @Test

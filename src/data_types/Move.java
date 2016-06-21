@@ -71,11 +71,13 @@ public interface Move {
     
     /**
      * Retrieve the set of coordinates on the chess board for which
-     * the pieces at these coordinates change
+     * the pieces at these coordinates change given that this move is played
+     * - requires that this move is currently a legal move on this board
+     * @param the board on which this move will be played
      * @return the set of coordinates on the chess board for which
      *          the pieces at these coordinates change
      */
-    public Set<Coordinate> coordinatesChanged();
+    public Set<Coordinate> coordinatesChanged(Board board);
     
     /**
      * Check if this move is a castling move

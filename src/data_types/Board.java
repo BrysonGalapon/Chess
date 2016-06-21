@@ -24,10 +24,9 @@ public class Board {
     //
     // make legalMoves part of rep so you don't need to recalculate it every time
     // figure out how to promote pawns
-    // add lastMove parameter to Board constructor
     // add in stalemate, 3 move repetition, 50 move rule, and insufficient material
     // add a resign button/ draw offer button
-    // justify spec of move to not allow any more moves on board after checkmate, and add tests to test that
+    // adjust spec of move to not allow any more moves on board after checkmate, and add tests to test that
     // add 'kingIsCastled(PieceColor side)' observer to check if a certain side castled
     // change heuristic in main so that rooks like open files, and that comp likes castling
     // add 'isUnprotected(Square square)' observer to check if a certain square on the board is unprotected
@@ -87,12 +86,14 @@ public class Board {
      * Create a chess board containing pieces and a side to move
      * @param whitePieces a map from a white piece to the set of coordinates that contain that piece
      * @param blackPieces a map from a black piece to the set of coordinates that contain that piece
+     * @param lastMove the last move that was played in the game
+     *         - if no last move can be defined, set lastMove == null
      * @param turn the side to move next
      */
-    public Board(Map<Piece, Set<Coordinate>> whitePieces, Map<Piece, Set<Coordinate>> blackPieces, PieceColor turn){
+    public Board(Map<Piece, Set<Coordinate>> whitePieces, Map<Piece, Set<Coordinate>> blackPieces, PieceColor turn, Move lastMove){
         createEmptyGrid();
         this.turn = turn;
-        this.lastMove = null;
+        this.lastMove = lastMove;
         
         Map<Piece, Set<Coordinate>> whitePiecesCopy = new HashMap<>(whitePieces);
         Map<Piece, Set<Coordinate>> blackPiecesCopy = new HashMap<>(blackPieces);
@@ -752,7 +753,7 @@ public class Board {
             
             // save the state of squares that will be changed
             Set<Square> squareState = new HashSet<>();
-            for (Coordinate coord : move.coordinatesChanged()) {
+            for (Coordinate coord : move.coordinatesChanged(this)) {
                 squareState.add(getSquare(coord));
             }
             PieceColor turn = turn();
@@ -787,7 +788,7 @@ public class Board {
             
             // save the state of squares that will be changed
             Set<Square> squareState = new HashSet<>();
-            for (Coordinate coord : move.coordinatesChanged()) {
+            for (Coordinate coord : move.coordinatesChanged(this)) {
                 squareState.add(getSquare(coord));
             }
             PieceColor turn = turn();
