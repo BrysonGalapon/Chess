@@ -22,6 +22,11 @@ public class Board {
     
     // TODO list:
     //
+    // make legalMoves part of rep so you don't need to recalculate it every time
+    // figure out how to promote pawns
+    // add lastMove parameter to Board constructor
+    // add in stalemate, 3 move repetition, 50 move rule, and insufficient material
+    // add a resign button/ draw offer button
     // justify spec of move to not allow any more moves on board after checkmate, and add tests to test that
     // add 'kingIsCastled(PieceColor side)' observer to check if a certain side castled
     // change heuristic in main so that rooks like open files, and that comp likes castling
@@ -152,6 +157,34 @@ public class Board {
         this.lastMove = chessMove;
         changeTurn();
         checkRep();
+    }
+    
+    /**
+     * Retrieve the legal moves that are checks and captures of this position
+     * @return the legal checks and captures the current player can make
+     */
+    public Set<Move> getChecksAndCaptures() {
+        Set<Move> legalMoves = legalMoves();
+        Set<Move> checksAndCaptures = new HashSet<>();
+        
+        Set<Move> checks = getChecks(legalMoves);
+        
+        for (Move move : legalMoves) {
+            // add captures
+            if (move.isCapture()) {
+                checksAndCaptures.add(move);
+                continue;
+            }
+            
+            // and checks
+            if (checks.contains(move)) {
+                checksAndCaptures.add(move);
+                continue;
+            }
+        }
+        
+        checkRep();
+        return checksAndCaptures;
     }
     
    /**
@@ -722,6 +755,8 @@ public class Board {
             for (Coordinate coord : move.coordinatesChanged()) {
                 squareState.add(getSquare(coord));
             }
+            PieceColor turn = turn();
+            Move lastMove = getLastMove();
             
             movePiece(move);
             
@@ -729,10 +764,48 @@ public class Board {
                 filteredMoves.add(move);
             }
             
+            // restore the state
             restoreBoard(squareState);
+            if (!turn().equals(turn)) {
+                flipTurn();
+            }
+            setLastMove(lastMove);
         }
         
         return filteredMoves;
+    }
+    
+    /**
+     * Obtain the moves that are checks in a given set
+     * @param moveSet set of moves to filter for checks
+     * @return the moves in moveSet that give check to the opposing king
+     */
+    private Set<Move> getChecks(Set<Move> moveSet) {
+        Set<Move> checks = new HashSet<>();
+        
+        for (Move move : moveSet) {
+            
+            // save the state of squares that will be changed
+            Set<Square> squareState = new HashSet<>();
+            for (Coordinate coord : move.coordinatesChanged()) {
+                squareState.add(getSquare(coord));
+            }
+            PieceColor turn = turn();
+            Move lastMove = getLastMove();
+            
+            this.move(move);
+            
+            if (inCheck()) {
+                checks.add(move);
+            }
+            
+            // restore the state
+            restoreBoard(squareState);
+            flipTurn();
+            setLastMove(lastMove);
+        }
+        
+        return checks;
     }
     
     /**

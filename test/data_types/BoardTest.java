@@ -303,13 +303,136 @@ public class BoardTest {
     // flipTurn:
     //  - turn is white's move, turn is black's move
     // 
-    //
+    // getChecksAndCaptures:
+    //  - no captures exist, multiple captures exist
+    //  - no checks exist, multiple checks exist
+    // 
     
     // TODO write tests and setLastMove, setSquareSet
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testGetChecksAndCapturesNoChecksOrCaptures() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackQueenPlacement = new HashSet<>();
+        Set<Coordinate> blackRookPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e7"));
+        blackKingPlacement.add(new Coordinate("b2"));
+        blackBishopPlacement.add(new Coordinate("h3"));
+        blackKnightPlacement.add(new Coordinate("a3"));
+        blackRookPlacement.add(new Coordinate("a2"));
+        blackQueenPlacement.add(new Coordinate("a1"));
+        blackPawnPlacement.add(new Coordinate("e3"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.queen(black, true), blackQueenPlacement);
+        blackPieces.put(Piece.rook(black, true), blackRookPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        
+        PieceColor turn = PieceColor.BLACK;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        assertEquals("Expected no checks or captures for black", 0, board.getChecksAndCaptures().size());
+    }
+    
+    @Test
+    public void testGetChecksAndCapturesOnlyChecks() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> whiteQueenPlacement = new HashSet<>();
+        Set<Coordinate> whiteRookPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("a1"));
+        blackKingPlacement.add(new Coordinate("e4"));
+        whiteRookPlacement.add(new Coordinate("b2"));
+        whiteQueenPlacement.add(new Coordinate("c3"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        whitePieces.put(Piece.queen(white, true), whiteQueenPlacement);
+        whitePieces.put(Piece.rook(white, true), whiteRookPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        Set<Move> checksAndCaptures = board.getChecksAndCaptures();
+        
+        assertEquals("Expected 12 checks and 0 captures for black", 12, checksAndCaptures.size());
+    }
+    
+    @Test
+    public void testGetChecksAndCapturesOnlyCaptures() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> whiteQueenPlacement = new HashSet<>();
+        Set<Coordinate> whiteRookPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("e7"));
+        blackKingPlacement.add(new Coordinate("h6"));
+        blackBishopPlacement.add(new Coordinate("h3"));
+        blackKnightPlacement.add(new Coordinate("b5"));
+        whiteRookPlacement.add(new Coordinate("g2"));
+        whiteQueenPlacement.add(new Coordinate("c3"));
+        whitePawnPlacement.add(new Coordinate("h5"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        whitePieces.put(Piece.queen(white, true), whiteQueenPlacement);
+        whitePieces.put(Piece.rook(white, true), whiteRookPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        
+        PieceColor turn = PieceColor.BLACK;
+        
+        Board board = new Board(whitePieces, blackPieces, turn);
+        
+        Set<Move> checksAndCaptures = board.getChecksAndCaptures();
+        
+        assertEquals("Expected 0 checks and 3 captures for black", 3, checksAndCaptures.size());
+        
+        Move move1 = Move.createMove(board.getSquare("b5"), board.getSquare("c3"));
+        Move move2 = Move.createMove(board.getSquare("h6"), board.getSquare("h5"));
+        Move move3 = Move.createMove(board.getSquare("h3"), board.getSquare("g2"));
+
+        assertTrue("Expected knight capture of queen to be a capture", checksAndCaptures.contains(move1));
+        assertTrue("Expected king capture of pawn to be a capture", checksAndCaptures.contains(move2));
+        assertTrue("Expected bishop capture of rook to be a capture", checksAndCaptures.contains(move3));
     }
     
     @Test

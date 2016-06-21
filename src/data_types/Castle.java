@@ -29,8 +29,9 @@ public class Castle implements Move{
      * Create a new Castle object
      * @param turnSide side (white or black) that is castling
      * @param castleSide side (queenside or kingside) to castle to
+     * @throws IllegalArgumentException if move is an invalid move
      */
-    public Castle(PieceColor turnSide, CastleSide castleSide) {
+    public Castle(PieceColor turnSide, CastleSide castleSide) throws IllegalArgumentException{
         this.turnSide = turnSide;
         this.castleSide = castleSide;
         checkRep();

@@ -32,12 +32,17 @@ public class Normal implements Move {
      * @param piece piece that is being moved
      * @param coordFrom coordinate that this piece is being moved from
      * @param coordTo coordinate that this piece is being moved to
+     * @throws IllegalArgumentException if move is an invalid chess move
      */
-    public Normal(Piece piece, Coordinate coordFrom, Coordinate coordTo, Piece capturedPiece) {
+    public Normal(Piece piece, Coordinate coordFrom, Coordinate coordTo, Piece capturedPiece) throws IllegalArgumentException{
         this.piece = piece;
         this.coordFrom = coordFrom;
         this.coordTo = coordTo;
         this.capturedPiece = capturedPiece;
+        
+        if (!piece.moveSet(coordFrom).contains(coordTo)) {
+            throw new IllegalArgumentException("Illegal move attempted");
+        }
         checkRep();
     }
     

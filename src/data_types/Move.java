@@ -18,8 +18,9 @@ public interface Move {
      * @param squareFrom square that the current player clicked first
      * @param sqaureTo square that the current player clicked last
      * @return a Move object that represents the move that the current player made 
+     * @throws IllegalArgumentException if move is an invalid chess move
      */
-    public static Move createMove(Square squareFrom, Square squareTo) {
+    public static Move createMove(Square squareFrom, Square squareTo) throws IllegalArgumentException{
         Piece movedPiece = squareFrom.getPiece();
         
         Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
@@ -35,7 +36,7 @@ public interface Move {
                 CastleSide castleSide = (coordTo.equals(new Coordinate("g1"))) ? CastleSide.KINGSIDE : CastleSide.QUEENSIDE;
                 return new Castle(movedPiece.color(), castleSide);
             } else if (movedPiece.equals(unmovedBlackKing)) {
-                // if the king lands on g1, then we castle kingside. Otherwise, we castle queenside.
+                // if the king lands on g8, then we castle kingside. Otherwise, we castle queenside.
                 CastleSide castleSide = (coordTo.equals(new Coordinate("g8"))) ? CastleSide.KINGSIDE : CastleSide.QUEENSIDE;
                 return new Castle(movedPiece.color(), castleSide);
             } else {
