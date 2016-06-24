@@ -57,6 +57,14 @@ public class Promotion implements Move {
         return squareFrom.getPiece();
     }
     
+    /**
+     * Retrieve the piece that this pawn is promoting to
+     * @return the piece that this pawn is promoting to
+     */
+    public Piece promotedPiece() {
+        return promotedPiece;
+    }
+    
     @Override
     public Set<Piece> movedPieces() {
         Set<Piece> movedPieces = new HashSet<>();
@@ -105,8 +113,9 @@ public class Promotion implements Move {
         boolean piecesEquivalent = this.movedPieces().equals(otherPromotion.movedPieces());
         boolean coordToEquivalent = this.coordTo().equals(otherPromotion.coordTo());
         boolean coordFromEquivalent = this.coordFrom().equals(otherPromotion.coordFrom());
+        boolean promotedPieceEquivalent = this.promotedPiece().equals(otherPromotion.promotedPiece());
         
-        return piecesEquivalent && coordToEquivalent && coordFromEquivalent;
+        return piecesEquivalent && coordToEquivalent && coordFromEquivalent && promotedPieceEquivalent;
     }
     
     @Override

@@ -356,8 +356,6 @@ public class BoardTest {
         assertEquals("Expected no checks or captures for black", 0, board.getChecksAndCaptures().size());
     }
     
-    
-    
     @Test
     public void testGetChecksAndCapturesOnlyChecks() {
         PieceColor white = PieceColor.WHITE;
@@ -679,7 +677,46 @@ public class BoardTest {
     
     @Test
     public void testLegalMovesPromotion() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
         
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> whiteKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("h2"));
+        blackKingPlacement.add(new Coordinate("b7"));
+        whitePawnPlacement.add(new Coordinate("f7"));
+        blackPawnPlacement.add(new Coordinate("a2"));
+        whiteKnightPlacement.add(new Coordinate("b1"));
+        blackKnightPlacement.add(new Coordinate("g8"));
+        blackKnightPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("e8"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.knight(white, false), whiteKnightPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn, null);
+        
+        assertEquals("Expected 20 legal moves for white, including promotions", 20, board.legalMoves().size());
+        
+        board.flipTurn();
+        
+        assertEquals("Expected 22 legal moves for black, including promotions", 22, board.legalMoves().size());
     }
     
     @Test

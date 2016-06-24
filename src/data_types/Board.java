@@ -306,8 +306,8 @@ public class Board {
                         if (isEnPassent) {
                             legalMoves.add(Move.enPassent(squareFrom, squareTo));
                         } else if (isPromotion) {
-                            legalMoves.add(Move.promote(squareFrom, squareTo, Piece.queen(piece.color(), true)));
                             legalMoves.add(Move.promote(squareFrom, squareTo, Piece.knight(piece.color(), true)));
+                            legalMoves.add(Move.promote(squareFrom, squareTo, Piece.queen(piece.color(), true)));
                             legalMoves.add(Move.promote(squareFrom, squareTo, Piece.bishop(piece.color(), true)));
                             legalMoves.add(Move.promote(squareFrom, squareTo, Piece.rook(piece.color(), true)));
                         } else {
@@ -342,7 +342,11 @@ public class Board {
                                 Coordinate farthestCoord = farthestCoordinateCleared.get(direction);
                                 
                                 if (fartherAway(coordFrom, coordTo, farthestCoord).equals(coordTo)) {
-                                    if (!squaresCleared(farthestCoord, coordTo)) {continue;}
+                                    
+                                    // each square, (including the square at farthestCoord must be clear), since
+                                    // every square in the cardinal direction from coordFrom to farthestCoord exclusive
+                                    // has been checked to be clear
+                                    if (!squaresCleared(farthestCoord, coordTo) || getSquare(farthestCoord).isOccupied()) {continue;}
                                     
                                     farthestCoordinateCleared.put(direction, coordTo);
                                 }
