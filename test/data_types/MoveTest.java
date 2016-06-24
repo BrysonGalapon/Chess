@@ -35,9 +35,125 @@ public class MoveTest {
     //  - move is a castle move, move is not a castle move
     // 
     
+    // TODO: write tests for captureCoordinate
+    
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testToString() {
+        Board board = new Board();
+        
+        Move move = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
+        board.move(move);
+        assertEquals("e4", move.toString());
+        
+        move = Move.createMove(board.getSquare("d7"), board.getSquare("d5"));
+        board.move(move);
+        assertEquals("d5", move.toString());
+        
+        move = Move.createMove(board.getSquare("e4"), board.getSquare("d5"));
+        board.move(move);
+        assertEquals("exd5", move.toString());
+        
+        move = Move.createMove(board.getSquare("c7"), board.getSquare("c5"));
+        board.move(move);
+        assertEquals("c5", move.toString());
+        
+        move = Move.enPassent(board.getSquare("d5"), board.getSquare("c6"));
+        board.move(move);
+        assertEquals("dxc6", move.toString());
+        
+        move = Move.createMove(board.getSquare("b8"), board.getSquare("c6"));
+        board.move(move);
+        assertEquals("Nxc6", move.toString());
+        
+        move = Move.createMove(board.getSquare("f1"), board.getSquare("b5"));
+        board.move(move);
+        assertEquals("Bb5", move.toString());
+        
+        move = Move.createMove(board.getSquare("a7"), board.getSquare("a5"));
+        board.move(move);
+        assertEquals("a5", move.toString());
+        
+        move = Move.createMove(board.getSquare("g1"), board.getSquare("h3"));
+        board.move(move);
+        assertEquals("Nh3", move.toString());
+        
+        move = Move.createMove(board.getSquare("a5"), board.getSquare("a4"));
+        board.move(move);
+        assertEquals("a4", move.toString());
+        
+        move = Move.createMove(board.getSquare("e1"), board.getSquare("g1"));
+        board.move(move);
+        assertEquals("O-O", move.toString());
+        
+        move = Move.createMove(board.getSquare("a4"), board.getSquare("a3"));
+        board.move(move);
+        assertEquals("a3", move.toString());
+        
+        move = Move.createMove(board.getSquare("f1"), board.getSquare("e1"));
+        board.move(move);
+        assertEquals("Re1", move.toString());
+        
+        move = Move.createMove(board.getSquare("a3"), board.getSquare("b2"));
+        board.move(move);
+        assertEquals("axb2", move.toString());
+        
+        move = Move.createMove(board.getSquare("e1"), board.getSquare("e7"));
+        board.move(move);
+        assertEquals("Rxe7", move.toString());
+        
+        move = Move.createMove(board.getSquare("d8"), board.getSquare("e7"));
+        board.move(move);
+        assertEquals("Qxe7", move.toString());
+        
+        move = Move.createMove(board.getSquare("d1"), board.getSquare("h5"));
+        board.move(move);
+        assertEquals("Qh5", move.toString());
+        
+        move = Move.promote(board.getSquare("b2"), board.getSquare("a1"), Piece.rook(PieceColor.BLACK, true));
+        board.move(move);
+        assertEquals("bxa1=R", move.toString());
+    }
+    
+    @Test
+    public void testPromotion() {
+        PieceColor white = PieceColor.WHITE;
+        
+        Square squareFrom = new Square(new Coordinate("g7"));
+        Square squareTo = new Square(new Coordinate("h8"));
+        
+        Piece promotingPawn = Piece.pawn(white, true);
+        Piece promotingPiece = Piece.knight(white, true);
+        
+        squareFrom.addPiece(promotingPawn);
+        
+        Move move = Move.promote(squareFrom, squareTo, promotingPiece);
+        
+        // if test makes it to this point, then move is a valid promotion, which is
+        // the crux of what this test is testing
+        assertFalse("Expected promotion to not be a castling move", move.isCastle());
+    }
+    
+    @Test
+    public void testEnPassentCapture() {
+        Board board = new Board();
+        
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a5")));
+        board.move(Move.createMove(board.getSquare("e4"), board.getSquare("e5")));
+        board.move(Move.createMove(board.getSquare("f7"), board.getSquare("f5")));
+        
+        Move move = Move.enPassent(board.getSquare("e5"), board.getSquare("f6"));
+        
+        // if test makes it to this point, then move is a valid en passent, which is
+        // the crux of what this test is testing
+
+        assertTrue("Expected en Passent to be a capture", move.isCapture());
+        assertFalse("Expected en Passent to not be castle move", move.isCastle());
     }
     
     @Test
@@ -49,14 +165,14 @@ public class MoveTest {
         board.move(Move.createMove(board.getSquare("e4"), board.getSquare("e5")));
         board.move(Move.createMove(board.getSquare("f7"), board.getSquare("f5")));
         
-        Move enPassent = Move.createMove(board.getSquare("e5"), board.getSquare("f6"));
+        Move enPassent = Move.enPassent(board.getSquare("e5"), board.getSquare("f6"));
         
         Set<Coordinate> expectedCoordinatesChanged = new HashSet<>();
         expectedCoordinatesChanged.add(new Coordinate("e5"));
         expectedCoordinatesChanged.add(new Coordinate("f5"));
         expectedCoordinatesChanged.add(new Coordinate("f6"));
 
-        assertEquals("Expected en passent to change f6 square", expectedCoordinatesChanged, enPassent.coordinatesChanged(board));
+        assertEquals("Expected en passent to change f6 square", expectedCoordinatesChanged, enPassent.coordinatesChanged());
     }
     
     @Test
@@ -137,8 +253,8 @@ public class MoveTest {
         expectedCoordinatesChangedBlack.add(new Coordinate("a8"));
         expectedCoordinatesChangedBlack.add(new Coordinate("d8"));
         
-        assertEquals("Expected correct changed coordinates for white castling kingside", expectedCoordinatesChangedWhite, whiteCastleKingside.coordinatesChanged(board));
-        assertEquals("Expected correct changed coordinates for black castling queenside", expectedCoordinatesChangedBlack, blackCastleQueenside.coordinatesChanged(board));
+        assertEquals("Expected correct changed coordinates for white castling kingside", expectedCoordinatesChangedWhite, whiteCastleKingside.coordinatesChanged());
+        assertEquals("Expected correct changed coordinates for black castling queenside", expectedCoordinatesChangedBlack, blackCastleQueenside.coordinatesChanged());
     }
     
     @Test

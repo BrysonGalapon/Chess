@@ -8,10 +8,8 @@ import java.util.Set;
  * @author Bryson
  */
 public class Normal implements Move {
-    private final Piece piece;
-    private final Coordinate coordFrom;
-    private final Coordinate coordTo;
-    private final Piece capturedPiece;
+    private final Square squareFrom;
+    private final Square squareTo;
     
     // Abstraction Function:
     //  - represents the move of piece piece from the square at coordinate coordFrom to 
@@ -29,18 +27,15 @@ public class Normal implements Move {
     
     /**
      * Create a new normal move
-     * @param piece piece that is being moved
-     * @param coordFrom coordinate that this piece is being moved from
-     * @param coordTo coordinate that this piece is being moved to
+     * @param squareFrom coordinate that this piece is being moved from
+     * @param squareTo coordinate that this piece is being moved to
      * @throws IllegalArgumentException if move is an invalid chess move
      */
-    public Normal(Piece piece, Coordinate coordFrom, Coordinate coordTo, Piece capturedPiece) throws IllegalArgumentException{
-        this.piece = piece;
-        this.coordFrom = coordFrom;
-        this.coordTo = coordTo;
-        this.capturedPiece = capturedPiece;
+    public Normal(Square squareFrom, Square squareTo) throws IllegalArgumentException{
+        this.squareFrom = squareFrom.squareCopy();
+        this.squareTo = squareTo.squareCopy();
         
-        if (!piece.moveSet(coordFrom).contains(coordTo)) {
+        if (!piece().moveSet(squareFrom.coordinate()).contains(squareTo.coordinate())) {
             throw new IllegalArgumentException("Illegal move attempted");
         }
         checkRep();
@@ -50,15 +45,23 @@ public class Normal implements Move {
      * Assert the Rep Invariant
      */
     private void checkRep() {
-        Set<Coordinate> validTargets = piece.moveSet(coordFrom);
+        Set<Coordinate> validTargets = piece().moveSet(squareFrom.coordinate());
         
-        assert validTargets.contains(coordTo);
+        assert validTargets.contains(squareTo.coordinate());
     }
 
+    /**
+     * Retrieve the piece moved on this move
+     * @return the piece moved on this move
+     */
+    public Piece piece() {
+        return squareFrom.getPiece();
+    }
+    
     @Override
     public Set<Piece> movedPieces() {
         Set<Piece> pieces = new HashSet<Piece>();
-        pieces.add(piece);
+        pieces.add(piece());
         
         checkRep();
         return pieces;
@@ -66,12 +69,12 @@ public class Normal implements Move {
 
     @Override
     public Coordinate coordFrom() {
-        return coordFrom;
+        return squareFrom.coordinate();
     }
 
     @Override
     public Coordinate coordTo() {
-        return coordTo;
+        return squareTo.coordinate();
     }
 
     @Override
@@ -80,20 +83,10 @@ public class Normal implements Move {
     }
     
     @Override
-    public Set<Coordinate> coordinatesChanged(Board board) {
-        Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
-
+    public Set<Coordinate> coordinatesChanged() {
         Set<Coordinate> coordsChanged = new HashSet<>();
-        coordsChanged.add(coordFrom);
-        coordsChanged.add(coordTo);
-        
-        // this move could be an enPassent move
-        if (isEnPassent(boardCopy)) {
-            int scalar = board.turn().equals(PieceColor.WHITE) ? -1 : 1;
-            
-            // en passent capture square is one below coordTo on white and one above coordTo on black
-            coordsChanged.add(new Coordinate(coordTo.getX(), coordTo.getY()+scalar));
-        }
+        coordsChanged.add(squareFrom.coordinate());
+        coordsChanged.add(squareTo.coordinate());
         
         checkRep();
         return coordsChanged;
@@ -101,7 +94,45 @@ public class Normal implements Move {
     
     @Override
     public String toString() {
-        return piece + ": " + coordFrom + " -> " + coordTo;
+        if (isCapture()) {
+            if (piece().isPawn()) {
+                String file = "";
+                switch (squareFrom.coordinate().getX()) {
+                case 0: 
+                    file += "a";
+                    break;
+                case 1:
+                    file += "b";
+                    break;
+                case 2:
+                    file += "c";
+                    break;
+                case 3:
+                    file += "d";
+                    break;
+                case 4:
+                    file += "e";
+                    break;
+                case 5:
+                    file += "f";
+                    break;
+                case 6:
+                    file += "g";
+                    break;
+                case 7:
+                    file += "h";
+                    break;
+                 default:
+                     throw new RuntimeException("Square From is outside of board!");
+                }    
+                
+                return file + "x" + squareTo.coordinate();
+            } else {
+                return piece().toString() + "x" + squareTo.coordinate();
+            }
+        } else {
+            return piece().toString() + squareTo.toString();
+        }
     }
     
     @Override
@@ -119,41 +150,25 @@ public class Normal implements Move {
     
     @Override
     public int hashCode() {
-        return piece.hashCode() + coordTo.hashCode() + coordFrom.hashCode();
+        return piece().hashCode() + coordTo().hashCode() + coordFrom().hashCode();
     }
 
     @Override
     public boolean isCapture() {
+        Piece capturedPiece = squareTo.getPiece();
+        
         if (!capturedPiece.exists()) {return false;}
         
         // return true if capturing opposite color
-        return !(capturedPiece.color().equals(piece.color()));
+        return !(capturedPiece.color().equals(piece().color()));
     }
-    
-    /**
-     * Check if this move is an enPassent move on a given board
-     * @param board on which this move is being played
-     * @return true if this move is an enPassent capture on this board
-     */
-    private boolean isEnPassent(Board board) {
-        Coordinate coordFrom = coordFrom();
-        Coordinate coordTo = coordTo();
-        
-        Move lastMove = board.getLastMove();
-        if (lastMove == null || lastMove.isCastle()) {return false;}
-        
-        Coordinate lastMoveCoordFrom = lastMove.coordFrom();
-        Coordinate lastMoveCoordTo = lastMove.coordTo();
-        Piece lastMovePiece = lastMove.movedPieces().iterator().next();
-        
-        boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
-                Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
-        boolean pawnHadPushedAdjacentFile = Math.abs(lastMoveCoordFrom.getX() - coordFrom.getX()) == 1;
-        
-        int scalar = (board.turn().equals(PieceColor.WHITE)) ? 1 : -1;
-        // pawn should capture into the square between lastMoveCoordFrom and lastMoveCoordTo
-        boolean pawnCanCapture = new Coordinate(lastMoveCoordFrom.getX(), lastMoveCoordFrom.getY()-scalar).equals(coordTo);
-        
-        return lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
+
+    @Override
+    public Coordinate captureCoordinate() throws RuntimeException {
+        if (isCapture()) {
+            return squareTo.coordinate();
+        } else {
+            throw new RuntimeException("This move is not a capture move");
+        }
     }
 }

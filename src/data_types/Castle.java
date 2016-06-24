@@ -80,7 +80,7 @@ public class Castle implements Move{
     }
     
     @Override
-    public Set<Coordinate> coordinatesChanged(Board board) {
+    public Set<Coordinate> coordinatesChanged() {
         Set<Coordinate> coordsChanged = new HashSet<>();
         int rookY = (turnSide.equals(PieceColor.WHITE)) ? 0 : Board.DEFAULT_SIZE-1; 
         int rookFromX = (castleSide.equals(CastleSide.KINGSIDE)) ? Board.DEFAULT_SIZE-1 : 0; // 0-indexed y-placement of king
@@ -98,9 +98,7 @@ public class Castle implements Move{
     
     @Override
     public String toString() {
-        Piece king = Piece.king(turnSide, false);
-        
-        return king + ": " + coordFrom() + " -> " + coordTo();
+        return castleSide.equals(CastleSide.KINGSIDE) ? "O-O" : "O-O-O";
     }
     
     @Override
@@ -126,5 +124,10 @@ public class Castle implements Move{
     @Override
     public boolean isCapture() {
         return false;
+    }
+
+    @Override
+    public Coordinate captureCoordinate() throws RuntimeException {
+        throw new RuntimeException("This move is not a capture move");
     }
 }

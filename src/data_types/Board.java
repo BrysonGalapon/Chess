@@ -146,7 +146,7 @@ public class Board {
         assert legalMoves().contains(chessMove);
         
         movePiece(chessMove);
-            
+        
         if (chessMove.isCastle()) {
             Coordinate rookCoord = getRookCoordinate(chessMove.coordTo());
             Square rookSquareFrom = getSquare(rookCoord);
@@ -296,15 +296,23 @@ public class Board {
                         // can't jump over pieces
                         if (pawnJumpedOverPiece(coordFrom, coordTo)) {continue;}
                         
-                        Move move = Move.createMove(getSquare(coordFrom), getSquare(coordTo));
-                        
                         boolean isCaptureMove = coordTo.getX() != coordFrom.getX();
-                        boolean isEnPassent = isEnPassent(move);
+                        boolean isEnPassent = isEnPassent(coordFrom, coordTo);
+                        boolean isPromotion = coordTo.getY() == 7 || coordTo.getY() == 0;
                         
                         // can't capture on an unoccupied square
                         if (!isEnPassent && isCaptureMove && !squareTo.isOccupied()) {continue;}
                         
-                        legalMoves.add(move);
+                        if (isEnPassent) {
+                            legalMoves.add(Move.enPassent(squareFrom, squareTo));
+                        } else if (isPromotion) {
+                            legalMoves.add(Move.promote(squareFrom, squareTo, Piece.queen(piece.color(), true)));
+                            legalMoves.add(Move.promote(squareFrom, squareTo, Piece.knight(piece.color(), true)));
+                            legalMoves.add(Move.promote(squareFrom, squareTo, Piece.bishop(piece.color(), true)));
+                            legalMoves.add(Move.promote(squareFrom, squareTo, Piece.rook(piece.color(), true)));
+                        } else {
+                            legalMoves.add(Move.createMove(squareFrom, squareTo));
+                        }
                     } else {
                         Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
                         Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
@@ -749,11 +757,11 @@ public class Board {
      */
     private Set<Move> filterChecks(Set<Move> moveSet) {
         Set<Move> filteredMoves = new HashSet<Move>();
+        
         for (Move move : moveSet) {
-            
             // save the state of squares that will be changed
             Set<Square> squareState = new HashSet<>();
-            for (Coordinate coord : move.coordinatesChanged(this)) {
+            for (Coordinate coord : move.coordinatesChanged()) {
                 squareState.add(getSquare(coord));
             }
             PieceColor turn = turn();
@@ -788,7 +796,7 @@ public class Board {
             
             // save the state of squares that will be changed
             Set<Square> squareState = new HashSet<>();
-            for (Coordinate coord : move.coordinatesChanged(this)) {
+            for (Coordinate coord : move.coordinatesChanged()) {
                 squareState.add(getSquare(coord));
             }
             PieceColor turn = turn();
@@ -841,21 +849,46 @@ public class Board {
         
         pieceToMove = pieceToMove.getMovedVersion();
         
+        if (move.isCapture()) {
+            Coordinate removeCoord = move.captureCoordinate();
+            grid[removeCoord.getX()][removeCoord.getY()].removePiece();            
+        }
+        
         squareTo.addPiece(pieceToMove);
         
         grid[coordFrom.getX()][coordFrom.getY()] = squareFrom;
         grid[coordTo.getX()][coordTo.getY()] = squareTo;
     }
-
+    
     /**
      * Check if a move is an enPassent move
      * @param move move to consider
      * @return true if move is an enPassent capture
      */
     private boolean isEnPassent(Move move) {
+        // move is not en passent if castling
+        if (move.isCastle()) {
+            return false;
+        } 
+        
+        // move is not en passent if not moving a pawn
+        if (!move.movedPieces().iterator().next().isPawn()) {
+            return false;
+        }
+        
         Coordinate coordFrom = move.coordFrom();
         Coordinate coordTo = move.coordTo();
         
+        return isEnPassent(coordFrom, coordTo);
+    }
+    
+    /**
+     * Check if a move is an enPassent move
+     * @param coordFrom coordinate to move pawn from
+     * @param coordTo coordinate to move pawn to
+     * @return true if a pawn move from coordFrom to coordTo is an enPassent capture
+     */
+    private boolean isEnPassent(Coordinate coordFrom, Coordinate coordTo) {
         Move lastMove = getLastMove();
         if (lastMove == null || lastMove.isCastle()) {return false;}
         

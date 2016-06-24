@@ -1,5 +1,6 @@
 package data_types;
 
+import java.util.Scanner;
 import java.util.Set;
 
 /**
@@ -9,12 +10,15 @@ import java.util.Set;
 public interface Move {
     
     // Data-type Definition:
-    // Move = Normal(piece:Piece, coordFrom:Coordinate, coordTo:Coordinate) + Castle(turnSide:PieceColor, castleSide:CastleSide)
+    // Move = Normal(piece:Piece, squareFrom:Square, squareTo:Square) + Castle(turnSide:PieceColor, castleSide:CastleSide)
+    //      + Promotion(piece:Piece, squareFrom:Square, squareTo:Square, Piece:promotedPiece)
+    //      + EnPassent(squareFrom:Square, squareTo:Square)
     
     /**
      * Create a new move.
      *  - to castle, set squareFrom to be the square that the king that is castling is currently on
      *           and set squareTo to be the square that the king will land on after castling
+     *  - this method does not handle en passent captures, @see enPassent method
      * @param squareFrom square that the current player clicked first
      * @param sqaureTo square that the current player clicked last
      * @return a Move object that represents the move that the current player made 
@@ -22,12 +26,45 @@ public interface Move {
      */
     public static Move createMove(Square squareFrom, Square squareTo) throws IllegalArgumentException{
         Piece movedPiece = squareFrom.getPiece();
+        Coordinate coordFrom = squareFrom.coordinate();
+        Coordinate coordTo = squareTo.coordinate();
+        
+        // detect promotion
+        if (movedPiece.isPawn() && ((coordTo.getY() == 7) || (coordTo.getY() == 0))) {
+            Scanner reader = new Scanner(System.in);
+            System.out.println("What piece would you like to promote to?");
+            System.out.println("You have the option of: Q, R, B, N");
+            try {
+                String piece = reader.nextLine();
+                String regex = "Q|R|B|N";
+                
+                if (!piece.matches(regex)) {
+                    throw new IllegalArgumentException("Unrecognized choice for promoted piece");
+                }
+                
+                switch (piece) {
+                case "Q":
+                    return promote(squareFrom, squareTo, Piece.queen(movedPiece.color(), true));
+                case "R":
+                    return promote(squareFrom, squareTo, Piece.rook(movedPiece.color(), true));
+                case "B":
+                    return promote(squareFrom, squareTo, Piece.bishop(movedPiece.color(), true));
+                case "N":
+                    return promote(squareFrom, squareTo, Piece.knight(movedPiece.color(), true));
+                default:
+                    throw new RuntimeException("Regex failed to capture only queen, rook, bishop, or knight promotions");
+                }
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                reader.close();
+            }
+        }
         
         Piece unmovedBlackKing = Piece.king(PieceColor.BLACK, false);
         Piece unmovedWhiteKing = Piece.king(PieceColor.WHITE, false);
         
-        Coordinate coordFrom = squareFrom.coordinate();
-        Coordinate coordTo = squareTo.coordinate();
         boolean pieceMovedTwoSquares = Math.abs(coordFrom.getX() - coordTo.getX()) == 2;
         
         if ((movedPiece.equals(unmovedWhiteKing) || movedPiece.equals(unmovedBlackKing)) && pieceMovedTwoSquares) {
@@ -43,13 +80,77 @@ public interface Move {
                 throw new RuntimeException("Impossible to be here. You broke computer science.");
             }
         } else {
-            return new Normal(movedPiece, coordFrom, coordTo, squareTo.getPiece());
+            return new Normal(squareFrom, squareTo);
         }
     }
     
     /**
+     * Create a new promotion.
+     * @param squareFrom square that the current player clicked first
+     * @param squareTo square that the current player clicked second
+     *          - requires that squareTo lives on either the 1st or 8th rank
+     * @param piece piece to promote to
+     * @return a Move object representing the promotion of a pawn to piece
+     * @throws IllegalArgumentException if squareFrom -> squareTo is not a legal promotion move
+     */
+    public static Move promote(Square squareFrom, Square squareTo, Piece piece) throws IllegalArgumentException {
+        Piece movedPiece = squareFrom.getPiece();
+        
+        // can't promote if:
+        //                   - the piece isn't a pawn,
+        //                   - promoted piece is not of the same color as promoting pawn
+        //                   - pawn is not landing on the 8th/1st rank
+        if (!movedPiece.isPawn() || !piece.color().equals(movedPiece.color()) 
+                || !((squareTo.coordinate().getY() == 7) || (squareTo.coordinate().getY() == 0))) {
+            throw new IllegalArgumentException("Invalid promotion");
+        }
+        
+        return new Promotion(squareFrom, squareTo, piece);
+    }
+    
+    /**
+     * Create a new en passent capture
+     * @param squareFrom square to move pawn from
+     * @param squareTo square that is being captured on
+     * @return a Move object representing an en passent move from squareFrom to squareTo
+     * @throws IllegalArgumentException if squareFrom -> squareTo is not a legal en passent move
+     */
+    public static Move enPassent(Square squareFrom, Square squareTo) throws IllegalArgumentException {
+        
+        Piece movedPiece = squareFrom.getPiece();
+        
+        Coordinate sourceCoordinate = squareFrom.coordinate();
+        Coordinate captureCoordinate = squareTo.coordinate();
+        
+        boolean validCapture;
+        
+        if (movedPiece.color().equals(PieceColor.WHITE)) {
+            validCapture = captureCoordinate.getX() != sourceCoordinate.getX() &&
+                                   captureCoordinate.getY() == sourceCoordinate.getY() + 1;
+        } else if (movedPiece.color().equals(PieceColor.BLACK)) {
+            validCapture = captureCoordinate.getX() != sourceCoordinate.getX() &&
+                                   captureCoordinate.getY() == sourceCoordinate.getY() - 1;
+        } else {
+            throw new IllegalArgumentException("Piece color is not either one of white or black");
+        }
+        
+        if (!movedPiece.isPawn() || !validCapture) {
+            throw new IllegalArgumentException("Invalid en passent");
+        }
+        
+        return new EnPassent(squareFrom, squareTo);
+    }
+    
+    /**
+     * Retrieve the capture coordinate for this move
+     * @return the capture coordinate for this move
+     * @throws RuntimeException if this move is not a capture move
+     */
+    public Coordinate captureCoordinate() throws RuntimeException;
+    
+    /**
      * Retrieve the pieces that moved
-     * @return the set of pieces that move on this move
+     * @return the set of pieces that move on this move, not including the pieces that get captured
      */
     public Set<Piece> movedPieces();
     
@@ -72,12 +173,10 @@ public interface Move {
     /**
      * Retrieve the set of coordinates on the chess board for which
      * the pieces at these coordinates change given that this move is played
-     * - requires that this move is currently a legal move on this board
-     * @param the board on which this move will be played
      * @return the set of coordinates on the chess board for which
      *          the pieces at these coordinates change
      */
-    public Set<Coordinate> coordinatesChanged(Board board);
+    public Set<Coordinate> coordinatesChanged();
     
     /**
      * Check if this move is a castling move
@@ -93,12 +192,27 @@ public interface Move {
     
     /**
      * Retrieve the string representation of this move
-     * @return a string in the form "P: c1 -> c2", 
+     * @return 
+     *         - if this move is castle move:
+     *              - if castling kingside,  return 'O-O'
+     *              - if castling queenside, return 'O-O-O'
+     *         - if this move is a promotion: 
+     *              - return a string in the form 'c=P', 
+     *                
+     *                where c is the coordinate that the pawn is being promoted on,
+     *                P is the piece the pawn is promoting to
+     *         - in all other cases, return a string in the form 'Pc'", 
      * 
-     *         where P is the piece in chess notation being moved,
-     *               c1 is the coordinate that this piece is being moved from
-     *               c2 is the coordinate that this piece is being moved to
-     */
+     *           where P is the piece in chess notation being moved,
+     *                c is the coordinate that this piece is being moved to
+     *         
+     *         - if this move is a capture move:
+     *              - if the moved piece is a pawn:
+     *                  - prepend the string 'fx' to normal output, where f is the name of the file containing
+     *                    the coordinate the piece is being moved from.
+     *                    (Note that the 'x' is a literal 'x')
+     *              - in all other cases, insert a literal 'x' between the 'P' and 'c' in normal output
+     */             
     @Override
     public String toString();
     

@@ -129,7 +129,7 @@ public class BoardTest {
         board.move(Move.createMove(board.getSquare("g8"), board.getSquare("f6")));
         board.move(Move.createMove(board.getSquare("d2"), board.getSquare("d4")));
 
-        Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn(), null);
+        Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
         
         assertEquals("Expected board copy to have same white pieces", board.whitePieces(), boardCopy.whitePieces());
         assertEquals("Expected board copy to have same black pieces", board.blackPieces(), boardCopy.blackPieces());
@@ -286,6 +286,8 @@ public class BoardTest {
     //  - position has a piece that's pinned, position doesn't have a piece that's pinned
     //  - current player can castle kingside, current player can not castle kingside
     //  - current player can castle queenside, current player can not castle queenside
+    //  - current player can capture en passent, current player can not capture en passent
+    //  - current player can promote a pawn, current player can not promote a pawn
     // 
     // checkMate:
     //  - position is checkmate, position is not checkmate
@@ -353,6 +355,8 @@ public class BoardTest {
         
         assertEquals("Expected no checks or captures for black", 0, board.getChecksAndCaptures().size());
     }
+    
+    
     
     @Test
     public void testGetChecksAndCapturesOnlyChecks() {
@@ -475,7 +479,7 @@ public class BoardTest {
         board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a6")));
         board.move(Move.createMove(board.getSquare("e4"), board.getSquare("e5")));
         board.move(Move.createMove(board.getSquare("d7"), board.getSquare("d5")));
-        Move enPassent = Move.createMove(board.getSquare("e5"), board.getSquare("d6")); 
+        Move enPassent = Move.enPassent(board.getSquare("e5"), board.getSquare("d6")); 
         
         assertTrue("Expected en passent to be a legal move in position: \n" + board, board.legalMoves().contains(enPassent));
     
@@ -492,7 +496,7 @@ public class BoardTest {
         board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a6")));
         board.move(Move.createMove(board.getSquare("e4"), board.getSquare("e5")));
         board.move(Move.createMove(board.getSquare("d7"), board.getSquare("d5")));
-        board.move(Move.createMove(board.getSquare("e5"), board.getSquare("d6")));
+        board.move(Move.enPassent(board.getSquare("e5"), board.getSquare("d6")));
         
         assertFalse("Expected pawn on d5 to be taken", board.getSquare("d5").isOccupied());
     }
@@ -505,7 +509,7 @@ public class BoardTest {
         board.move(Move.createMove(board.getSquare("c2"), board.getSquare("c4")));
         board.move(Move.createMove(board.getSquare("a5"), board.getSquare("a4")));
         board.move(Move.createMove(board.getSquare("b2"), board.getSquare("b4")));
-        board.move(Move.createMove(board.getSquare("a4"), board.getSquare("b3")));
+        board.move(Move.enPassent(board.getSquare("a4"), board.getSquare("b3")));
         
         assertFalse("Expected pawn on b4 to be taken", board.getSquare("b4").isOccupied());
     }
@@ -518,7 +522,7 @@ public class BoardTest {
         board.move(Move.createMove(board.getSquare("c2"), board.getSquare("c4")));
         board.move(Move.createMove(board.getSquare("a5"), board.getSquare("a4")));
         board.move(Move.createMove(board.getSquare("b2"), board.getSquare("b4")));
-        Move enPassent = Move.createMove(board.getSquare("a4"), board.getSquare("b3")); 
+        Move enPassent = Move.enPassent(board.getSquare("a4"), board.getSquare("b3")); 
         
         assertTrue("Expected en passent to be a legal move in position: \n" + board, board.legalMoves().contains(enPassent));
     
@@ -653,6 +657,29 @@ public class BoardTest {
 
         assertFalse("Expected castling kingside is illegal", board.legalMoves().contains(castleKingside));
         assertFalse("Expected castling queenside is illegal", board.legalMoves().contains(castleQueenside));
+    }
+    
+    @Test
+    public void testLegalMovesEnPassent() {
+        Board board = new Board();
+        
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a5")));
+        board.move(Move.createMove(board.getSquare("e4"), board.getSquare("e5")));
+        board.move(Move.createMove(board.getSquare("f7"), board.getSquare("f5")));
+        
+        assertEquals("Expected 31 legal moves for position: " + board, 31, board.legalMoves().size());
+        
+        board.move(Move.enPassent(board.getSquare("e5"), board.getSquare("f6")));
+        board.move(Move.createMove(board.getSquare("a5"), board.getSquare("a4")));
+        board.move(Move.createMove(board.getSquare("b2"), board.getSquare("b4")));
+
+        assertEquals("Expected 24 legal moves for this position: " + board, 24, board.legalMoves().size());
+    }
+    
+    @Test
+    public void testLegalMovesPromotion() {
+        
     }
     
     @Test
