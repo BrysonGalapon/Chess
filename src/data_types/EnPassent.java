@@ -168,4 +168,14 @@ public class EnPassent implements Move{
         
         return new Coordinate(squareTo.coordinate().getX(), squareTo.coordinate().getY()+scalar);
     }
+    
+    @Override
+    public boolean isPromotion() {
+        return false;
+    }
+
+    @Override
+    public Piece promotedPiece() throws RuntimeException {
+        throw new RuntimeException("This move does not promote a piece");
+    }
 }

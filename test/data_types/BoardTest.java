@@ -389,6 +389,50 @@ public class BoardTest {
     }
     
     @Test
+    public void testLegalMovesEnPassentCapture() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackQueenPlacement = new HashSet<>();
+        Set<Coordinate> blackRookPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("g7"));
+        whitePawnPlacement.add(new Coordinate("b2"));
+        blackKingPlacement.add(new Coordinate("h2"));
+        blackBishopPlacement.add(new Coordinate("a4"));
+        blackKnightPlacement.add(new Coordinate("d4"));
+        blackRookPlacement.add(new Coordinate("b8"));
+        blackQueenPlacement.add(new Coordinate("a2"));
+        blackPawnPlacement.add(new Coordinate("c4"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.pawn(white, false), whitePawnPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        blackPieces.put(Piece.queen(black, true), blackQueenPlacement);
+        blackPieces.put(Piece.rook(black, true), blackRookPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn, null);
+        
+        board.move(Move.createMove(board.getSquare("b2"), board.getSquare("b4")));
+        
+        assertEquals("Expected 43 legal moves for black, including en passent", 43, board.legalMoves().size());
+    }
+    
+    @Test
     public void testGetChecksAndCapturesOnlyCaptures() {
         PieceColor white = PieceColor.WHITE;
         PieceColor black = PieceColor.BLACK;
@@ -673,6 +717,188 @@ public class BoardTest {
         board.move(Move.createMove(board.getSquare("b2"), board.getSquare("b4")));
 
         assertEquals("Expected 24 legal moves for this position: " + board, 24, board.legalMoves().size());
+    }
+    
+    @Test
+    public void testMovePromotionQueen() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> whiteKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("h2"));
+        blackKingPlacement.add(new Coordinate("b7"));
+        whitePawnPlacement.add(new Coordinate("f7"));
+        blackPawnPlacement.add(new Coordinate("a2"));
+        whiteKnightPlacement.add(new Coordinate("b1"));
+        blackKnightPlacement.add(new Coordinate("g8"));
+        blackKnightPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("e8"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.knight(white, false), whiteKnightPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn, null);
+        
+        Move move = Move.promote(board.getSquare("f7"), board.getSquare("e8"), Piece.queen(PieceColor.WHITE, true));
+        
+        board.move(move);
+        
+        assertTrue("Expected promotion square to be occupied", board.getSquare("e8").isOccupied());
+        assertEquals("Expected white queen on e8", "Q", board.getSquare("e8").getPiece().toString());
+    }
+    
+    @Test
+    public void testMovePromotionKnight() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> whiteKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("h2"));
+        blackKingPlacement.add(new Coordinate("b7"));
+        whitePawnPlacement.add(new Coordinate("f7"));
+        blackPawnPlacement.add(new Coordinate("a2"));
+        whiteKnightPlacement.add(new Coordinate("b1"));
+        blackKnightPlacement.add(new Coordinate("g8"));
+        blackKnightPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("e8"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.knight(white, false), whiteKnightPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn, null);
+        
+        Move move = Move.promote(board.getSquare("f7"), board.getSquare("g8"), Piece.knight(PieceColor.WHITE, true));
+        
+        board.move(move);
+        
+        assertTrue("Expected promotion square to be occupied", board.getSquare("g8").isOccupied());
+        assertEquals("Expected white knight on g8", "N", board.getSquare("g8").getPiece().toString());
+    }
+    
+    @Test
+    public void testMovePromotionRook() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> whiteKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("h2"));
+        blackKingPlacement.add(new Coordinate("b7"));
+        whitePawnPlacement.add(new Coordinate("f7"));
+        blackPawnPlacement.add(new Coordinate("a2"));
+        whiteKnightPlacement.add(new Coordinate("b1"));
+        blackKnightPlacement.add(new Coordinate("g8"));
+        blackKnightPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("e8"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.knight(white, false), whiteKnightPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn, null);
+        
+        Move move = Move.promote(board.getSquare("f7"), board.getSquare("f8"), Piece.rook(PieceColor.WHITE, true));
+        
+        board.move(move);
+        
+        assertTrue("Expected promotion square to be occupied", board.getSquare("f8").isOccupied());
+        assertEquals("Expected white rook on f8", "R", board.getSquare("f8").getPiece().toString());
+    }
+    
+    @Test
+    public void testMovePromotionBishop() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> whiteKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("h2"));
+        blackKingPlacement.add(new Coordinate("b7"));
+        whitePawnPlacement.add(new Coordinate("f7"));
+        blackPawnPlacement.add(new Coordinate("a2"));
+        whiteKnightPlacement.add(new Coordinate("b1"));
+        blackKnightPlacement.add(new Coordinate("g8"));
+        blackKnightPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("e8"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.knight(white, false), whiteKnightPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn, null);
+        
+        Move firstMove = Move.promote(board.getSquare("f7"), board.getSquare("e8"), Piece.queen(PieceColor.WHITE, true));
+        board.move(firstMove);
+        
+        Move secondMove = Move.promote(board.getSquare("a2"), board.getSquare("b1"), Piece.bishop(PieceColor.BLACK, true));
+        board.move(secondMove);
+        
+        assertTrue("Expected promotion square to be occupied", board.getSquare("b1").isOccupied());
+        assertEquals("Expected black bishop on b1", "B", board.getSquare("b1").getPiece().toString());
     }
     
     @Test

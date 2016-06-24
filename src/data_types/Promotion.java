@@ -57,10 +57,7 @@ public class Promotion implements Move {
         return squareFrom.getPiece();
     }
     
-    /**
-     * Retrieve the piece that this pawn is promoting to
-     * @return the piece that this pawn is promoting to
-     */
+    @Override
     public Piece promotedPiece() {
         return promotedPiece;
     }
@@ -174,5 +171,10 @@ public class Promotion implements Move {
         } else {
             throw new RuntimeException("This move is not a capture move");
         }
+    }
+
+    @Override
+    public boolean isPromotion() {
+        return true;
     }
 }

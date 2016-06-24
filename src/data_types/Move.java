@@ -185,6 +185,19 @@ public interface Move {
     public boolean isCastle();
     
     /**
+     * Check if this move promotes a piece
+     * @return true if and only if this move promotes a piece
+     */
+    public boolean isPromotion();
+    
+    /**
+     * Retrieve the piece that is being promoted on this move
+     * @return the piece that is being promoted on this move
+     * @throws RuntimeException if this move does not promote a piece
+     */
+    public Piece promotedPiece() throws RuntimeException;
+    
+    /**
      * Check if this move captures a piece
      * @return true if and only if this move captures a piece
      */

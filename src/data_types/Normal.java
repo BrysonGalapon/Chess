@@ -171,4 +171,14 @@ public class Normal implements Move {
             throw new RuntimeException("This move is not a capture move");
         }
     }
+    
+    @Override
+    public boolean isPromotion() {
+        return false;
+    }
+
+    @Override
+    public Piece promotedPiece() throws RuntimeException {
+        throw new RuntimeException("This move does not promote a piece");
+    }
 }

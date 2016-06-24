@@ -35,7 +35,7 @@ public class MoveTest {
     //  - move is a castle move, move is not a castle move
     // 
     
-    // TODO: write tests for captureCoordinate
+    // TODO: write tests for captureCoordinate, isPromotion, and promotedPiece
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {

@@ -23,7 +23,6 @@ public class Board {
     // TODO list:
     //
     // make legalMoves part of rep so you don't need to recalculate it every time
-    // figure out how to promote pawns
     // add in stalemate, 3 move repetition, 50 move rule, and insufficient material
     // add a resign button/ draw offer button
     // adjust spec of move to not allow any more moves on board after checkmate, and add tests to test that
@@ -803,7 +802,6 @@ public class Board {
             for (Coordinate coord : move.coordinatesChanged()) {
                 squareState.add(getSquare(coord));
             }
-            PieceColor turn = turn();
             Move lastMove = getLastMove();
             
             this.move(move);
@@ -858,7 +856,11 @@ public class Board {
             grid[removeCoord.getX()][removeCoord.getY()].removePiece();            
         }
         
-        squareTo.addPiece(pieceToMove);
+        if (move.isPromotion()) {
+            squareTo.addPiece(move.promotedPiece());
+        } else {
+            squareTo.addPiece(pieceToMove);
+        }
         
         grid[coordFrom.getX()][coordFrom.getY()] = squareFrom;
         grid[coordTo.getX()][coordTo.getY()] = squareTo;
