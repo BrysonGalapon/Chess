@@ -18,10 +18,11 @@ public class Board {
     
     private final Square[][] grid = new Square[DEFAULT_SIZE][DEFAULT_SIZE];
     private PieceColor turn;
-    private Move lastMove;
+    private List<Move> movesPlayed = new ArrayList<>();
     
     // TODO list:
     //
+    // add UNDEFINED variant to move so to get rid of null
     // make legalMoves part of rep so you don't need to recalculate it every time
     // add in stalemate, 3 move repetition, 50 move rule, and insufficient material
     // add a resign button/ draw offer button
@@ -60,7 +61,6 @@ public class Board {
         PieceColor white = PieceColor.WHITE;
         
         turn = white;
-        lastMove = null;
         
         // add all black pieces
         addInitialPawns(black);
@@ -92,7 +92,9 @@ public class Board {
     public Board(Map<Piece, Set<Coordinate>> whitePieces, Map<Piece, Set<Coordinate>> blackPieces, PieceColor turn, Move lastMove){
         createEmptyGrid();
         this.turn = turn;
-        this.lastMove = lastMove;
+        if (lastMove != null) {
+            movesPlayed.add(lastMove);
+        }
         
         Map<Piece, Set<Coordinate>> whitePiecesCopy = new HashMap<>(whitePieces);
         Map<Piece, Set<Coordinate>> blackPiecesCopy = new HashMap<>(blackPieces);
@@ -154,9 +156,40 @@ public class Board {
             movePiece(rookMove);
         }
         
-        this.lastMove = chessMove;
+        this.movesPlayed.add(chessMove);
         changeTurn();
         checkRep();
+    }
+    
+    /**
+     * Take back the last move played 
+     *  - if last move is null, then don't change the board
+     */
+    public void takeBackLastMove() {
+        Move lastMove = getLastMove();
+        
+        if (lastMove == null) {
+            // don't do anything 
+            return;
+        } 
+        
+        takeBackMove(lastMove);
+        
+        // flip the turn to the other side
+        flipTurn();
+        
+        // remove the last element from movesPlayed
+        movesPlayed.remove(lastMove); 
+    }
+    
+    /**
+     * Retrieve a list of the moves played on this board
+     * @return an in-order list of the moves played on this board up
+     *          until the last move played
+     *         - if no moves have been played, return an empty list
+     */
+    public List<Move> movesPlayed() {
+        return new ArrayList<>(movesPlayed);
     }
     
     /**
@@ -381,15 +414,12 @@ public class Board {
      *          - if there is no last move, return null
      */
     public Move getLastMove() {
-        return lastMove;
-    }
-    
-    /**
-     * Give this board a new last move
-     * @param lastMove the last move to give to this board
-     */
-    public void setLastMove(Move lastMove) {
-        this.lastMove = lastMove;
+        if (movesPlayed.size() == 0) {
+            return null;
+        } 
+        
+        int finalIndex = movesPlayed.size()-1;
+        return movesPlayed.get(finalIndex);
     }
     
     /**
@@ -482,6 +512,27 @@ public class Board {
         checkRep();
     }
     
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof Board)) {return false;}
+        
+        Board otherBoard = (Board) other;
+        
+        if (this.getLastMove() == null && otherBoard.getLastMove() == null) {
+            return true;
+        } else if (this.getLastMove() == null || otherBoard.getLastMove() == null) {
+            return false;
+        }
+        
+        boolean whitePiecesSame = this.whitePieces().equals(otherBoard.whitePieces());
+        boolean blackPiecesSame = this.blackPieces().equals(otherBoard.blackPieces());
+        boolean legalMovesSame = this.legalMoves().equals(otherBoard.legalMoves());
+        boolean turnSame = this.turn().equals(otherBoard.turn());
+        boolean lastMoveSame = this.getLastMove().equals(otherBoard.getLastMove());
+        
+        return legalMovesSame && turnSame && lastMoveSame && whitePiecesSame && blackPiecesSame;
+    }
+    
     /**
      * Flip the current turn to the opposing side (or pass the turn), without changing the 
      *  physical board
@@ -491,18 +542,6 @@ public class Board {
             this.turn = PieceColor.WHITE;
         } else {
             this.turn = PieceColor.BLACK;
-        }
-    }
-    
-    /**
-     * Change a group of squares on this board
-     * @param squareSet set of squares to place on this board
-     */
-    public void setSquareSet(Set<Square> squareSet) {
-        Set<Square> squareSetCopy = new HashSet<>(squareSet);
-        
-        for (Square square : squareSetCopy) {
-            forceSetSquare(square);
         }
     }
     
@@ -754,6 +793,126 @@ public class Board {
     }
     
     /**
+     * Take back a move played on this board
+     * @param lastMove to be taken back
+     */
+    private void takeBackMove(Move lastMove) {
+        PieceColor side = getArbitrary(lastMove.movedPieces()).color();
+        
+        if (lastMove.isCastle()) {
+            if (side.equals(PieceColor.WHITE)) {
+                if (lastMove.coordTo().equals(new Coordinate("g1"))) {
+                    Square kingSquare = new Square(new Coordinate("e1"));
+                    kingSquare.addPiece(Piece.king(PieceColor.WHITE, false));
+                    Square rookSquare = new Square(new Coordinate("h1"));
+                    rookSquare.addPiece(Piece.rook(PieceColor.WHITE, false));
+                    
+                    // set the appropriate squares
+                    forceSetSquare(kingSquare);
+                    forceSetSquare(new Square(new Coordinate("f1")));
+                    forceSetSquare(new Square(new Coordinate("g1")));
+                    forceSetSquare(rookSquare);
+                    return;
+                }
+                
+                if (lastMove.coordTo().equals(new Coordinate("c1"))) {
+                    Square kingSquare = new Square(new Coordinate("e1"));
+                    kingSquare.addPiece(Piece.king(PieceColor.WHITE, false));
+                    Square rookSquare = new Square(new Coordinate("a1"));
+                    rookSquare.addPiece(Piece.rook(PieceColor.WHITE, false));
+                    
+                    // set the appropriate squares
+                    forceSetSquare(kingSquare);
+                    forceSetSquare(new Square(new Coordinate("d1")));
+                    forceSetSquare(new Square(new Coordinate("c1")));
+                    forceSetSquare(new Square(new Coordinate("b1")));
+                    forceSetSquare(rookSquare);
+                    return;
+                }
+            } else if (side.equals(PieceColor.BLACK)){
+                if (lastMove.coordTo().equals(new Coordinate("g8"))) {
+                    Square kingSquare = new Square(new Coordinate("e8"));
+                    kingSquare.addPiece(Piece.king(PieceColor.BLACK, false));
+                    Square rookSquare = new Square(new Coordinate("h8"));
+                    rookSquare.addPiece(Piece.rook(PieceColor.BLACK, false));
+                    
+                    // set the appropriate squares
+                    forceSetSquare(kingSquare);
+                    forceSetSquare(new Square(new Coordinate("f8")));
+                    forceSetSquare(new Square(new Coordinate("g8")));
+                    forceSetSquare(rookSquare);
+                    return;
+                }
+                
+                if (lastMove.coordTo().equals(new Coordinate("c8"))) {
+                    Square kingSquare = new Square(new Coordinate("e8"));
+                    kingSquare.addPiece(Piece.king(PieceColor.BLACK, false));
+                    Square rookSquare = new Square(new Coordinate("a8"));
+                    rookSquare.addPiece(Piece.rook(PieceColor.BLACK, false));
+                    
+                    // set the appropriate squares
+                    forceSetSquare(kingSquare);
+                    forceSetSquare(new Square(new Coordinate("d8")));
+                    forceSetSquare(new Square(new Coordinate("c8")));
+                    forceSetSquare(new Square(new Coordinate("b8")));
+                    forceSetSquare(rookSquare);
+                    return;
+                }
+            } else {
+                throw new RuntimeException("Turn is not either one of white or black");
+            }
+        } else if (lastMove.isEnPassent()) {
+            if (side.equals(PieceColor.WHITE)) {
+                Coordinate coordTo = lastMove.coordTo();
+                
+                Square pawnSquare = new Square(lastMove.coordFrom());
+                pawnSquare.addPiece(Piece.pawn(PieceColor.WHITE, true));
+                Square oppPawnSquare = new Square(new Coordinate(coordTo.getX(), coordTo.getY()-1));
+                oppPawnSquare.addPiece(Piece.pawn(PieceColor.BLACK, true));
+                Square captureSquare = new Square(coordTo);
+                
+                forceSetSquare(pawnSquare);
+                forceSetSquare(oppPawnSquare);
+                forceSetSquare(captureSquare);
+            } else if (side.equals(PieceColor.BLACK)) {
+                Coordinate coordTo = lastMove.coordTo();
+                
+                Square pawnSquare = new Square(lastMove.coordFrom());
+                pawnSquare.addPiece(Piece.pawn(PieceColor.BLACK, true));
+                Square oppPawnSquare = new Square(new Coordinate(coordTo.getX(), coordTo.getY()+1));
+                oppPawnSquare.addPiece(Piece.pawn(PieceColor.WHITE, true));
+                Square captureSquare = new Square(coordTo);
+                
+                forceSetSquare(pawnSquare);
+                forceSetSquare(oppPawnSquare);
+                forceSetSquare(captureSquare);
+            } else {
+                throw new RuntimeException("Turn is not either one of white or black");
+            }
+        } else if (lastMove.isCapture()){
+            Piece capturedPiece = lastMove.capturedPiece();
+            Piece movedPiece = getArbitrary(lastMove.movedPieces());
+            
+            Square pieceSquare = new Square(lastMove.coordFrom());
+            pieceSquare.addPiece(movedPiece);
+            Square captureSquare = new Square(lastMove.coordTo());
+            captureSquare.addPiece(capturedPiece);
+            
+            forceSetSquare(pieceSquare);
+            forceSetSquare(captureSquare);
+        } else {
+            Piece movedPiece = getArbitrary(lastMove.movedPieces());
+            
+            Square pieceSquare = new Square(lastMove.coordFrom());
+            pieceSquare.addPiece(movedPiece);
+            Square landingSquare = new Square(lastMove.coordTo());
+            
+            forceSetSquare(pieceSquare);
+            forceSetSquare(landingSquare);
+        }
+    }
+    
+    /**
      * Filter out the moves that would result in an illegal position via landing in check
      * @param moveSet set of moves to filter for checks
      * @return the moves in moveSet that don't result in an illegal position via check
@@ -762,26 +921,13 @@ public class Board {
         Set<Move> filteredMoves = new HashSet<Move>();
         
         for (Move move : moveSet) {
-            // save the state of squares that will be changed
-            Set<Square> squareState = new HashSet<>();
-            for (Coordinate coord : move.coordinatesChanged()) {
-                squareState.add(getSquare(coord));
-            }
-            PieceColor turn = turn();
-            Move lastMove = getLastMove();
-            
             movePiece(move);
             
             if (!inCheck()) {
                 filteredMoves.add(move);
             }
             
-            // restore the state
-            restoreBoard(squareState);
-            if (!turn().equals(turn)) {
-                flipTurn();
-            }
-            setLastMove(lastMove);
+            takeBackMove(move);
         }
         
         return filteredMoves;
@@ -796,24 +942,13 @@ public class Board {
         Set<Move> checks = new HashSet<>();
         
         for (Move move : moveSet) {
-            
-            // save the state of squares that will be changed
-            Set<Square> squareState = new HashSet<>();
-            for (Coordinate coord : move.coordinatesChanged()) {
-                squareState.add(getSquare(coord));
-            }
-            Move lastMove = getLastMove();
-            
-            this.move(move);
+            move(move);
             
             if (inCheck()) {
                 checks.add(move);
             }
             
-            // restore the state
-            restoreBoard(squareState);
-            flipTurn();
-            setLastMove(lastMove);
+            takeBackLastMove();
         }
         
         return checks;
@@ -918,7 +1053,7 @@ public class Board {
      * @param squareState set of original squares to restore
      */
     private void restoreBoard(Set<Square> squareState) {
-        for(Square square : squareState) {
+        for (Square square : squareState) {
             grid[square.coordinate().getX()][square.coordinate().getY()] = square;
         }
     }
@@ -1243,5 +1378,24 @@ public class Board {
         square.addPiece(queen);
         
         grid[3][rank] = square;
+    }
+    
+    /**
+     * Retrieve an arbitrary element out of a set
+     * @param set Set of elements to remove from
+     * @return any element contained in set
+     */
+    private <T> T getArbitrary(Set<T> set) {
+        if (set.size() == 0) {
+            throw new RuntimeException("Can not remove an arbitrary element out of empty set");
+        }
+        
+        T arbitraryItem = null;
+        
+        for (T item : set) {
+            arbitraryItem = item;
+        }
+        
+        return arbitraryItem;
     }
 }

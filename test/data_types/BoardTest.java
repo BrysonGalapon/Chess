@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -308,13 +310,288 @@ public class BoardTest {
     // getChecksAndCaptures:
     //  - no captures exist, multiple captures exist
     //  - no checks exist, multiple checks exist
+    //  
+    // takeBackLastMove: 
+    //  - last move was a castling move, last move was not a castling move
+    //  - last move promoted a piece, last move did not promote a piece
+    //  - last move was an en passent, last move was not an en passent
+    //  - last move captured a piece, last move did not capture a piece
+    //  - last move moved a piece normally, last move did not move a piece normally
     // 
-    
-    // TODO write tests and setLastMove, setSquareSet
+    // movesPlayed:
+    //  - no moves were played, multiple moves were played
+    //  - one was move was played, more than one move was played
+    //  - moves played includes castling, moves played does not include castling
+    //  - moves played includes en passent, moves played does not include en passent
+    //  - moves played includes a promotion, moves played does not include a promotion
+    //  
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
+    }
+    
+    @Test
+    public void testMovesPlayedNone() {
+        Board board1 = new Board();
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> whiteKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("h2"));
+        blackKingPlacement.add(new Coordinate("b7"));
+        whitePawnPlacement.add(new Coordinate("f7"));
+        blackPawnPlacement.add(new Coordinate("a2"));
+        whiteKnightPlacement.add(new Coordinate("b1"));
+        blackKnightPlacement.add(new Coordinate("g8"));
+        blackKnightPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("e8"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.knight(white, false), whiteKnightPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board2 = new Board(whitePieces, blackPieces, turn, null);
+        
+        assertEquals("Expected empty move history", 0, board1.movesPlayed().size());
+        assertEquals("Expected empty move history", 0, board2.movesPlayed().size());
+    }
+    
+    @Test
+    public void testTakeBackLastMoveCaptureAndNormal() {
+        Board board = new Board();
+        
+        Move firstMove = Move.createMove(board.getSquare("b2"), board.getSquare("b4"));
+        Board firstExpectedBoard = new Board();
+        board.move(firstMove);
+        board.takeBackLastMove();
+        
+        assertEquals("Expected board to return to initial state", firstExpectedBoard, board);
+        
+        board.move(firstMove);
+        
+        Move secondMove = Move.createMove(board.getSquare("g8"), board.getSquare("h6"));
+        Board secondExpectedBoard = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
+        board.move(secondMove);
+        board.takeBackLastMove();
+        assertEquals("Expected board to return to original state", secondExpectedBoard, board);
+        
+        board.move(secondMove);
+        board.move(Move.createMove(board.getSquare("b4"), board.getSquare("b5")));
+        board.move(Move.createMove(board.getSquare("a7"), board.getSquare("a5")));
+        
+        Board thirdExpectedBoard = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
+        
+        board.move(Move.enPassent(board.getSquare("b5"), board.getSquare("a6")));
+        board.takeBackLastMove();
+
+        assertEquals("Expected board to return to original state", thirdExpectedBoard, board);
+    }
+    
+    @Test
+    public void testMovesPlayedOneMove() {
+        Board board = new Board();
+        
+        Move move = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
+        List<Move> movesPlayed = Arrays.asList(move);
+        
+        board.move(move);
+        
+        assertEquals("Expected movesPlayed to handle a single move", movesPlayed, board.movesPlayed());
+    }
+    
+    @Test
+    public void testMovesPlayedEnPassent() {
+        Board board = new Board();
+        
+        Move move1 = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
+        board.move(move1);
+        Move move2 = Move.createMove(board.getSquare("a7"), board.getSquare("a6"));
+        board.move(move2);
+        Move move3 = Move.createMove(board.getSquare("e4"), board.getSquare("e5"));
+        board.move(move3);
+        Move move4 = Move.createMove(board.getSquare("d7"), board.getSquare("d5"));
+        board.move(move4);
+        Move move5 = Move.enPassent(board.getSquare("e5"), board.getSquare("d6"));
+        board.move(move5);
+        
+        List<Move> movesPlayed = Arrays.asList(move1, move2, move3, move4, move5);
+        
+        assertEquals("Expected sequence of moves played to handle en passents", movesPlayed, board.movesPlayed());
+    }
+    
+    @Test
+    public void testMovesPlayedReverse() {
+        Board board = new Board();
+
+        Move move1 = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
+        board.move(move1);
+        Move move2 = Move.createMove(board.getSquare("e7"), board.getSquare("e5"));
+        board.move(move2);
+        Move move3 = Move.createMove(board.getSquare("g1"), board.getSquare("f3"));
+        board.move(move3);
+        Move move4 = Move.createMove(board.getSquare("b8"), board.getSquare("c6"));
+        board.move(move4);
+        Move move5 = Move.createMove(board.getSquare("f1"), board.getSquare("c4"));
+        board.move(move5);
+        Move move6 = Move.createMove(board.getSquare("f8"), board.getSquare("c5"));
+        board.move(move6);
+        Move move7 = Move.createMove(board.getSquare("c2"), board.getSquare("c3"));
+        board.move(move7);
+        Move move8 = Move.createMove(board.getSquare("g8"), board.getSquare("f6"));
+        board.move(move8);
+        Move move9 = Move.createMove(board.getSquare("d2"), board.getSquare("d4"));
+        board.move(move9);
+        Move move10 = Move.createMove(board.getSquare("e5"), board.getSquare("d4"));
+        board.move(move10);
+        Move move11 = Move.createMove(board.getSquare("c3"), board.getSquare("d4"));
+        board.move(move11);
+        Move move12 = Move.createMove(board.getSquare("c5"), board.getSquare("b4"));
+        board.move(move12);
+        Move move13 = Move.createMove(board.getSquare("b1"), board.getSquare("c3"));
+        board.move(move13);
+        Move move14 = Move.createMove(board.getSquare("f6"), board.getSquare("e4"));
+        board.move(move14);
+        Move move15 = Move.createMove(board.getSquare("e1"), board.getSquare("g1"));
+        board.move(move15);
+        
+        // take back every move that has been played
+        int numMovesPlayed = board.movesPlayed().size();
+        for (int i = 0; i < numMovesPlayed; i++) {
+            board.takeBackLastMove();
+        }
+        
+        assertEquals("Expected to revert back to original board", new Board(), board);
+    }
+    
+    @Test
+    public void testTakeBackLastMovePromotion() {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        Map<Piece, Set<Coordinate>> whitePieces = new HashMap<>();
+        Map<Piece, Set<Coordinate>> blackPieces = new HashMap<>();
+        
+        Set<Coordinate> whiteKingPlacement = new HashSet<>();
+        Set<Coordinate> whitePawnPlacement = new HashSet<>();
+        Set<Coordinate> whiteKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackKingPlacement = new HashSet<>();
+        Set<Coordinate> blackPawnPlacement = new HashSet<>();
+        Set<Coordinate> blackKnightPlacement = new HashSet<>();
+        Set<Coordinate> blackBishopPlacement = new HashSet<>();
+        
+        whiteKingPlacement.add(new Coordinate("h2"));
+        blackKingPlacement.add(new Coordinate("b7"));
+        whitePawnPlacement.add(new Coordinate("f7"));
+        blackPawnPlacement.add(new Coordinate("a2"));
+        whiteKnightPlacement.add(new Coordinate("b1"));
+        blackKnightPlacement.add(new Coordinate("g8"));
+        blackKnightPlacement.add(new Coordinate("a1"));
+        blackBishopPlacement.add(new Coordinate("e8"));
+        
+        whitePieces.put(Piece.king(white, true), whiteKingPlacement);
+        whitePieces.put(Piece.knight(white, false), whiteKnightPlacement);
+        whitePieces.put(Piece.pawn(white, true), whitePawnPlacement);
+        blackPieces.put(Piece.king(black, true), blackKingPlacement);
+        blackPieces.put(Piece.bishop(black, true), blackBishopPlacement);
+        blackPieces.put(Piece.pawn(black, true), blackPawnPlacement);
+        blackPieces.put(Piece.knight(black, true), blackKnightPlacement);
+        
+        PieceColor turn = PieceColor.WHITE;
+        
+        Board board = new Board(whitePieces, blackPieces, turn, null);
+        
+        Move move = Move.promote(board.getSquare("f7"), board.getSquare("g8"), Piece.knight(PieceColor.WHITE, true));
+        board.move(move);
+        
+        List<Move> movesPlayed = Arrays.asList(move);
+        
+        assertEquals("Expected promotion to be included in movesPlayed", movesPlayed, board.movesPlayed());
+    }
+    
+    @Test
+    public void testMovesPlayedCastling() {
+        Board board = new Board();
+
+        Move move1 = Move.createMove(board.getSquare("e2"), board.getSquare("e4"));
+        board.move(move1);
+        Move move2 = Move.createMove(board.getSquare("e7"), board.getSquare("e5"));
+        board.move(move2);
+        Move move3 = Move.createMove(board.getSquare("g1"), board.getSquare("f3"));
+        board.move(move3);
+        Move move4 = Move.createMove(board.getSquare("b8"), board.getSquare("c6"));
+        board.move(move4);
+        Move move5 = Move.createMove(board.getSquare("f1"), board.getSquare("c4"));
+        board.move(move5);
+        Move move6 = Move.createMove(board.getSquare("f8"), board.getSquare("c5"));
+        board.move(move6);
+        Move move7 = Move.createMove(board.getSquare("c2"), board.getSquare("c3"));
+        board.move(move7);
+        Move move8 = Move.createMove(board.getSquare("g8"), board.getSquare("f6"));
+        board.move(move8);
+        Move move9 = Move.createMove(board.getSquare("d2"), board.getSquare("d4"));
+        board.move(move9);
+        Move move10 = Move.createMove(board.getSquare("e5"), board.getSquare("d4"));
+        board.move(move10);
+        Move move11 = Move.createMove(board.getSquare("c3"), board.getSquare("d4"));
+        board.move(move11);
+        Move move12 = Move.createMove(board.getSquare("c5"), board.getSquare("b4"));
+        board.move(move12);
+        Move move13 = Move.createMove(board.getSquare("b1"), board.getSquare("c3"));
+        board.move(move13);
+        Move move14 = Move.createMove(board.getSquare("f6"), board.getSquare("e4"));
+        board.move(move14);
+        Move move15 = Move.createMove(board.getSquare("e1"), board.getSquare("g1"));
+        board.move(move15);
+        
+        List<Move> movesPlayed = Arrays.asList(move1, move2, move3, move4, move5,
+                                               move6, move7, move8, move9, move10,
+                                               move11, move12, move13, move14, move15);
+        
+        assertEquals("Expected moves played to include castling", movesPlayed, board.movesPlayed());
+    }
+    
+    @Test
+    public void testTakeBackLastMoveCastling() {
+        Board board = new Board();
+
+        board.move(Move.createMove(board.getSquare("e2"), board.getSquare("e4")));
+        board.move(Move.createMove(board.getSquare("e7"), board.getSquare("e5")));
+        board.move(Move.createMove(board.getSquare("g1"), board.getSquare("f3")));
+        board.move(Move.createMove(board.getSquare("b8"), board.getSquare("c6")));
+        board.move(Move.createMove(board.getSquare("f1"), board.getSquare("c4")));
+        board.move(Move.createMove(board.getSquare("f8"), board.getSquare("c5")));
+        board.move(Move.createMove(board.getSquare("c2"), board.getSquare("c3")));
+        board.move(Move.createMove(board.getSquare("g8"), board.getSquare("f6")));
+        board.move(Move.createMove(board.getSquare("d2"), board.getSquare("d4")));
+        board.move(Move.createMove(board.getSquare("e5"), board.getSquare("d4")));
+        board.move(Move.createMove(board.getSquare("c3"), board.getSquare("d4")));
+        board.move(Move.createMove(board.getSquare("c5"), board.getSquare("b4")));
+        board.move(Move.createMove(board.getSquare("b1"), board.getSquare("c3")));
+        board.move(Move.createMove(board.getSquare("f6"), board.getSquare("e4")));
+       
+        Board expectedBoard = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
+        
+        board.move(Move.createMove(board.getSquare("e1"), board.getSquare("g1")));
+        board.takeBackLastMove();
+
+        assertEquals("Expected board to return to original state", expectedBoard, board);
     }
     
     @Test

@@ -181,4 +181,18 @@ public class Normal implements Move {
     public Piece promotedPiece() throws RuntimeException {
         throw new RuntimeException("This move does not promote a piece");
     }
+
+    @Override
+    public boolean isEnPassent() {
+        return false;
+    }
+    
+    @Override
+    public Piece capturedPiece() throws RuntimeException {
+        if (isCapture()) {
+            return squareTo.getPiece();
+        } else {
+            throw new RuntimeException("This move is not a capture move");
+        }
+    }
 }

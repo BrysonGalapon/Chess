@@ -189,6 +189,12 @@ public interface Move {
      * @return true if and only if this move promotes a piece
      */
     public boolean isPromotion();
+
+    /**
+     * Check if this move is an en passent capture
+     * @return true if and only if this move is an en passent capture
+     */
+    public boolean isEnPassent();
     
     /**
      * Retrieve the piece that is being promoted on this move
@@ -196,6 +202,13 @@ public interface Move {
      * @throws RuntimeException if this move does not promote a piece
      */
     public Piece promotedPiece() throws RuntimeException;
+    
+    /**
+     * Retrieve the piece that was captured on this move
+     * @return the piece that was captured on this move
+     * @throws RuntimeException if this move does not capture a piece
+     */
+    public Piece capturedPiece() throws RuntimeException;
     
     /**
      * Check if this move captures a piece

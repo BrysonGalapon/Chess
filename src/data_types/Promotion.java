@@ -177,4 +177,18 @@ public class Promotion implements Move {
     public boolean isPromotion() {
         return true;
     }
+
+    @Override
+    public boolean isEnPassent() {
+        return false;
+    }
+
+    @Override
+    public Piece capturedPiece() throws RuntimeException {
+        if (isCapture()) {
+            return squareTo.getPiece();
+        } else {
+            throw new RuntimeException("This move is not a capture move");
+        }
+    }
 }

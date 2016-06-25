@@ -178,4 +178,23 @@ public class EnPassent implements Move{
     public Piece promotedPiece() throws RuntimeException {
         throw new RuntimeException("This move does not promote a piece");
     }
+
+    @Override
+    public boolean isEnPassent() {
+        return true;
+    }
+    
+    @Override
+    public Piece capturedPiece() throws RuntimeException {
+        PieceColor white = PieceColor.WHITE;
+        PieceColor black = PieceColor.BLACK;
+        
+        if (piece().color().equals(white)) {
+            return Piece.pawn(black, true);
+        } else if (piece().color().equals(black)) {
+            return Piece.pawn(white, true);
+        } else {
+            throw new RuntimeException("En passent capture pawn is not one of white or black");
+        }
+    }
 }

@@ -128,7 +128,7 @@ public class Castle implements Move{
 
     @Override
     public Coordinate captureCoordinate() throws RuntimeException {
-        throw new RuntimeException("This move is not a capture move");
+        throw new RuntimeException("Castling is not a capture move");
     }
 
     @Override
@@ -139,5 +139,15 @@ public class Castle implements Move{
     @Override
     public Piece promotedPiece() throws RuntimeException {
         throw new RuntimeException("This move does not promote a piece");
+    }
+
+    @Override
+    public boolean isEnPassent() {
+        return false;
+    }
+
+    @Override
+    public Piece capturedPiece() throws RuntimeException {
+        throw new RuntimeException("Castling is not a capture move");
     }
 }
