@@ -86,13 +86,12 @@ public class Board {
      * @param whitePieces a map from a white piece to the set of coordinates that contain that piece
      * @param blackPieces a map from a black piece to the set of coordinates that contain that piece
      * @param lastMove the last move that was played in the game
-     *         - if no last move can be defined, set lastMove == null
      * @param turn the side to move next
      */
     public Board(Map<Piece, Set<Coordinate>> whitePieces, Map<Piece, Set<Coordinate>> blackPieces, PieceColor turn, Move lastMove){
         createEmptyGrid();
         this.turn = turn;
-        if (lastMove != null) {
+        if (!lastMove.isUndefined()) {
             movesPlayed.add(lastMove);
         }
         
@@ -162,13 +161,45 @@ public class Board {
     }
     
     /**
+     * Check if a move of a piece at coordinate coordFromto coordinate coordTo
+     *  would be an en passent capture
+     * @param coordFrom coordinate to move pawn from
+     * @param coordTo coordinate to move pawn to
+     * @return true if a pawn move from coordFrom to coordTo is an enPassent capture
+     */
+    public boolean isEnPassent(Coordinate coordFrom, Coordinate coordTo) {
+        // may not en passent without moving a pawn
+        if (!getSquare(coordFrom).getPiece().isPawn()) {
+            return false;
+        }
+        
+        Move lastMove = getLastMove();
+        if (lastMove.isUndefined() || lastMove.isCastle()) {return false;}
+        
+        Coordinate lastMoveCoordFrom = lastMove.coordFrom();
+        Coordinate lastMoveCoordTo = lastMove.coordTo();
+        Piece lastMovePiece = lastMove.movedPieces().iterator().next();
+        
+        boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
+                Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
+        boolean pawnHadPushedAdjacentFile = Math.abs(lastMoveCoordFrom.getX() - coordFrom.getX()) == 1;
+        
+        int scalar = (turn().equals(PieceColor.WHITE)) ? 1 : -1;
+        // pawn should capture into the square between lastMoveCoordFrom and lastMoveCoordTo
+        boolean pawnCanCapture = new Coordinate(lastMoveCoordFrom.getX(), lastMoveCoordFrom.getY()-scalar).equals(coordTo);
+        
+        return lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
+    }
+
+    
+    /**
      * Take back the last move played 
-     *  - if last move is null, then don't change the board
+     *  - if last move is undefined, then don't change the board
      */
     public void takeBackLastMove() {
         Move lastMove = getLastMove();
         
-        if (lastMove == null) {
+        if (lastMove.isUndefined()) {
             // don't do anything 
             return;
         } 
@@ -411,11 +442,11 @@ public class Board {
     /**
      * Retrieve the last move that was played
      * @return the last move that was played
-     *          - if there is no last move, return null
+     *          - if there is no last move, return an undefined move
      */
     public Move getLastMove() {
         if (movesPlayed.size() == 0) {
-            return null;
+            return Move.undefined();
         } 
         
         int finalIndex = movesPlayed.size()-1;
@@ -517,12 +548,6 @@ public class Board {
         if (!(other instanceof Board)) {return false;}
         
         Board otherBoard = (Board) other;
-        
-        if (this.getLastMove() == null && otherBoard.getLastMove() == null) {
-            return true;
-        } else if (this.getLastMove() == null || otherBoard.getLastMove() == null) {
-            return false;
-        }
         
         boolean whitePiecesSame = this.whitePieces().equals(otherBoard.whitePieces());
         boolean blackPiecesSame = this.blackPieces().equals(otherBoard.blackPieces());
@@ -1021,31 +1046,6 @@ public class Board {
         Coordinate coordTo = move.coordTo();
         
         return isEnPassent(coordFrom, coordTo);
-    }
-    
-    /**
-     * Check if a move is an enPassent move
-     * @param coordFrom coordinate to move pawn from
-     * @param coordTo coordinate to move pawn to
-     * @return true if a pawn move from coordFrom to coordTo is an enPassent capture
-     */
-    private boolean isEnPassent(Coordinate coordFrom, Coordinate coordTo) {
-        Move lastMove = getLastMove();
-        if (lastMove == null || lastMove.isCastle()) {return false;}
-        
-        Coordinate lastMoveCoordFrom = lastMove.coordFrom();
-        Coordinate lastMoveCoordTo = lastMove.coordTo();
-        Piece lastMovePiece = lastMove.movedPieces().iterator().next();
-        
-        boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
-                Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
-        boolean pawnHadPushedAdjacentFile = Math.abs(lastMoveCoordFrom.getX() - coordFrom.getX()) == 1;
-        
-        int scalar = (turn().equals(PieceColor.WHITE)) ? 1 : -1;
-        // pawn should capture into the square between lastMoveCoordFrom and lastMoveCoordTo
-        boolean pawnCanCapture = new Coordinate(lastMoveCoordFrom.getX(), lastMoveCoordFrom.getY()-scalar).equals(coordTo);
-        
-        return lastMovePiece.isPawn() && pawnHadPushedTwoSquares && pawnHadPushedAdjacentFile && pawnCanCapture;
     }
     
     /**

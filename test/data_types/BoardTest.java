@@ -217,7 +217,7 @@ public class BoardTest {
         PieceColor turn = PieceColor.WHITE;
         
         double constructorStartTime = System.currentTimeMillis();
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         double constructorLength = System.currentTimeMillis() - constructorStartTime;
         
         double blackPiecesStartTime = System.currentTimeMillis();
@@ -326,6 +326,8 @@ public class BoardTest {
     //  - moves played includes a promotion, moves played does not include a promotion
     //  
     
+    // TODO write tests for isEnPassent
+    
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea
@@ -367,7 +369,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board2 = new Board(whitePieces, blackPieces, turn, null);
+        Board board2 = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected empty move history", 0, board1.movesPlayed().size());
         assertEquals("Expected empty move history", 0, board2.movesPlayed().size());
@@ -515,7 +517,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move move = Move.promote(board.getSquare("f7"), board.getSquare("g8"), Piece.knight(PieceColor.WHITE, true));
         board.move(move);
@@ -628,7 +630,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected no checks or captures for black", 0, board.getChecksAndCaptures().size());
     }
@@ -658,7 +660,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Set<Move> checksAndCaptures = board.getChecksAndCaptures();
         
@@ -702,7 +704,7 @@ public class BoardTest {
 
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         board.move(Move.createMove(board.getSquare("b2"), board.getSquare("b4")));
         
@@ -743,7 +745,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Set<Move> checksAndCaptures = board.getChecksAndCaptures();
         
@@ -876,7 +878,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move chessMove = Move.createMove(board.getSquare("a7"), board.getSquare("a5"));
         
@@ -909,7 +911,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected 24 legal moves for white, including castling", 24, board.legalMoves().size());
     }
@@ -937,7 +939,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         for (Move move : board.legalMoves()) {
             assertFalse("Expected no castle moves for moved king", move.isCastle());
@@ -967,7 +969,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected 24 legal moves for white, including castling", 24, board.legalMoves().size());
         
@@ -1031,7 +1033,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move move = Move.promote(board.getSquare("f7"), board.getSquare("e8"), Piece.queen(PieceColor.WHITE, true));
         
@@ -1076,7 +1078,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move move = Move.promote(board.getSquare("f7"), board.getSquare("g8"), Piece.knight(PieceColor.WHITE, true));
         
@@ -1121,7 +1123,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move move = Move.promote(board.getSquare("f7"), board.getSquare("f8"), Piece.rook(PieceColor.WHITE, true));
         
@@ -1166,7 +1168,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move firstMove = Move.promote(board.getSquare("f7"), board.getSquare("e8"), Piece.queen(PieceColor.WHITE, true));
         board.move(firstMove);
@@ -1213,7 +1215,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected 20 legal moves for white, including promotions", 20, board.legalMoves().size());
         
@@ -1248,7 +1250,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected 25 legal moves for white, including castling", 25, board.legalMoves().size());
         
@@ -1285,7 +1287,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected 24 legal moves for white, including castling", 24, board.legalMoves().size());
         
@@ -1322,7 +1324,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected 5 legal moves for white, including castling", 5, board.legalMoves().size());
         
@@ -1359,7 +1361,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected 23 legal moves for black, including castling", 23, board.legalMoves().size());
         
@@ -1407,7 +1409,7 @@ public class BoardTest {
         Board board = new Board();
         Move lastMove = board.getLastMove();
         
-        assertTrue("Expected null initial first move", lastMove == null);
+        assertTrue("Expected null initial first move", lastMove.isUndefined());
     }
     
     @Test
@@ -1462,7 +1464,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move move = Move.createMove(board.getSquare("b1"), board.getSquare("c1"));
         
@@ -1495,7 +1497,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move move = Move.createMove(board.getSquare("g3"), board.getSquare("g1"));
         
@@ -1529,7 +1531,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move move = Move.createMove(board.getSquare("e8"), board.getSquare("g7"));
         
@@ -1572,7 +1574,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Move move = Move.createMove(board.getSquare("g7"), board.getSquare("a7"));
         
@@ -1725,7 +1727,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected correct retrieval of 1 white piece", whitePieces, board.whitePieces());
         assertEquals("Expected correct retrieval of multiple black pieces", blackPieces, board.blackPieces());
@@ -1756,7 +1758,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected correct retrieval of 1 black piece", blackPieces, board.blackPieces());
         assertEquals("Expected correct retrieval of multiple white pieces", whitePieces, board.whitePieces());
@@ -1813,7 +1815,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.WHITE;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertTrue("Expected this position to be checkmate for white", board.checkMate());
     }
@@ -1843,7 +1845,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertFalse("Expected no checkmate for black", board.checkMate());
     }
@@ -1870,7 +1872,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected only 1 legal move", 1, board.legalMoves().size());
         
@@ -1927,7 +1929,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         Set<Move> legalMoves = board.legalMoves();
 
@@ -1993,7 +1995,7 @@ public class BoardTest {
         
         PieceColor turn = PieceColor.BLACK;
         
-        Board board = new Board(whitePieces, blackPieces, turn, null);
+        Board board = new Board(whitePieces, blackPieces, turn, Move.undefined());
         
         assertEquals("Expected only 2 legal moves for black", 2, board.legalMoves().size());
         

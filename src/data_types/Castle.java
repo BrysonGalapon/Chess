@@ -150,4 +150,9 @@ public class Castle implements Move{
     public Piece capturedPiece() throws RuntimeException {
         throw new RuntimeException("Castling is not a capture move");
     }
+
+    @Override
+    public boolean isUndefined() {
+        return false;
+    }
 }

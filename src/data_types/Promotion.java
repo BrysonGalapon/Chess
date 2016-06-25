@@ -191,4 +191,9 @@ public class Promotion implements Move {
             throw new RuntimeException("This move is not a capture move");
         }
     }
+
+    @Override
+    public boolean isUndefined() {
+        return false;
+    }
 }

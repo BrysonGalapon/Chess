@@ -197,4 +197,9 @@ public class EnPassent implements Move{
             throw new RuntimeException("En passent capture pawn is not one of white or black");
         }
     }
+
+    @Override
+    public boolean isUndefined() {
+        return false;
+    }
 }

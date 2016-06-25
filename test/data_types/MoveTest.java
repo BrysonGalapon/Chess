@@ -36,7 +36,7 @@ public class MoveTest {
     // 
     
     // TODO: write tests for captureCoordinate, isPromotion, and promotedPiece
-    //       isEnPassent, capturedPiece
+    //       isEnPassent, capturedPiece, isUndefined
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
         assert false; // make sure assertions are enabled with VM argument: -ea

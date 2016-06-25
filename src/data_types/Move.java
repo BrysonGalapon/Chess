@@ -12,7 +12,7 @@ public interface Move {
     // Data-type Definition:
     // Move = Normal(piece:Piece, squareFrom:Square, squareTo:Square) + Castle(turnSide:PieceColor, castleSide:CastleSide)
     //      + Promotion(piece:Piece, squareFrom:Square, squareTo:Square, Piece:promotedPiece)
-    //      + EnPassent(squareFrom:Square, squareTo:Square)
+    //      + EnPassent(squareFrom:Square, squareTo:Square) + UndefinedMove()
     
     /**
      * Create a new move.
@@ -142,6 +142,14 @@ public interface Move {
     }
     
     /**
+     * Retrieve an undefined move
+     * @return a move that can not be defined
+     */
+    public static Move undefined() {
+        return new UndefinedMove();
+    }
+    
+    /**
      * Retrieve the capture coordinate for this move
      * @return the capture coordinate for this move
      * @throws RuntimeException if this move is not a capture move
@@ -215,6 +223,12 @@ public interface Move {
      * @return true if and only if this move captures a piece
      */
     public boolean isCapture();
+    
+    /**
+     * Check if this move is defined (or not) - i.e. moves a piece to a particular square
+     * @return true if and only if this move can not be defined (i.e. moves a piece to a particular square)
+     */
+    public boolean isUndefined();
     
     /**
      * Retrieve the string representation of this move
