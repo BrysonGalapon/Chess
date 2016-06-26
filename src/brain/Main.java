@@ -1,5 +1,6 @@
 package brain;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
@@ -39,6 +40,7 @@ public class Main {
         while (!board.checkMate()) {
             System.out.println();
             System.out.println(board);
+            System.out.println("Evaluation: " + heuristic(board));
             
             // player turn
             System.out.print("Square to move piece from: ");
@@ -60,6 +62,7 @@ public class Main {
                 board.move(move);
                 System.out.println("You made move: " + move);
                 System.out.println(board);
+                System.out.println("Evaluation: " + heuristic(board));
 
             } catch (IllegalArgumentException e) {
                 System.out.println("Move invalid. Try again");
@@ -108,7 +111,164 @@ public class Main {
     
     public static Move getComputerMove(Board board) {
         Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
-        return getArbitrary(boardCopy.legalMoves());
+        
+        if (boardCopy.turn().equals(PieceColor.WHITE)) {
+            Map<Move, Integer> bestCaptureMap = maxMoveCaptures(boardCopy, 5);
+            Move bestCapture = getArbitrary(bestCaptureMap.keySet());
+            int bestCaptureValue = bestCaptureMap.get(bestCapture);
+            
+            Move bestNormalMove = Move.undefined();
+            int bestNormalValue = -1000;
+            
+            for (Move move : boardCopy.legalMoves()) {
+                if (!move.isCapture()) {
+                    boardCopy.move(move);
+                    Map<Move, Integer> bestResponseMap = minMoveCaptures(boardCopy, 3);
+                    Move bestResponseCapture = getArbitrary(bestResponseMap.keySet());
+                    int bestResponseValue = bestResponseMap.get(bestResponseCapture);
+                    
+                    if (bestResponseValue >= bestNormalValue) {
+                        bestNormalMove = move;
+                        bestNormalValue = bestResponseValue;
+                    }
+                    
+                    boardCopy.takeBackLastMove();
+                }
+            }
+            
+            if (bestCapture.isUndefined() || bestNormalValue > bestCaptureValue) {return bestNormalMove;}
+            
+            return bestCapture;
+        } else if (boardCopy.turn().equals(PieceColor.BLACK)) {
+            Map<Move, Integer> bestCaptureMap = minMoveCaptures(boardCopy, 5);
+            Move bestCapture = getArbitrary(bestCaptureMap.keySet());
+            int bestCaptureValue = bestCaptureMap.get(bestCapture);
+            
+            Move bestNormalMove = Move.undefined();
+            int bestNormalValue = 1000;
+            
+            for (Move move : boardCopy.legalMoves()) {
+                if (!move.isCapture()) {
+                    boardCopy.move(move);
+                    Map<Move, Integer> bestResponseMap = maxMoveCaptures(boardCopy, 3);
+                    Move bestResponseCapture = getArbitrary(bestResponseMap.keySet());
+                    int bestResponseValue = bestResponseMap.get(bestResponseCapture);
+                    
+                    if (bestResponseValue <= bestNormalValue) {
+                        bestNormalMove = move;
+                        bestNormalValue = bestResponseValue;
+                    }
+                    
+                    boardCopy.takeBackLastMove();
+                }
+            }
+            
+            if (bestCapture.isUndefined() || bestNormalValue < bestCaptureValue) {return bestNormalMove;}
+            
+            return bestCapture;
+        } else {
+            throw new RuntimeException("Board turn is not one of white or black");
+        }
+    }
+    
+    public static Map<Move, Integer> maxMoveCaptures(Board board, int levelAnalysis) {
+        Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
+        Map<Move, Integer> bestCaptureMap = new HashMap<>();
+        
+        Set<Move> captures = boardCopy.getCaptures();
+        
+        Move bestCapture = Move.undefined();
+        int bestValue = -1000;
+        
+        if (captures.size() == 0) {
+            bestCaptureMap.put(bestCapture, heuristic(boardCopy));
+            return bestCaptureMap;
+        }
+        
+        if (levelAnalysis <= 0) {
+            for (Move capture : captures) {
+                boardCopy.move(capture);
+                
+                int heuristic = heuristic(boardCopy);
+                if (heuristic >= bestValue) {
+                    bestCapture = capture;
+                    bestValue = heuristic;
+                }
+                
+                boardCopy.takeBackLastMove();
+            }
+            
+            bestCaptureMap.put(bestCapture, bestValue);
+            return bestCaptureMap;
+        }
+        
+        for (Move capture : captures) {
+            boardCopy.move(capture);
+            
+            Map<Move, Integer> responseCaptureMap = minMoveCaptures(boardCopy, levelAnalysis-1);
+            Move bestResponseCapture = getArbitrary(responseCaptureMap.keySet());
+            int bestResponseValue = responseCaptureMap.get(bestResponseCapture);
+            
+            if (bestResponseValue >= bestValue) {
+                bestCapture = capture;
+                bestValue = bestResponseValue;
+            }
+            
+            boardCopy.takeBackLastMove();
+        }
+        
+        bestCaptureMap.put(bestCapture, bestValue);
+        return bestCaptureMap;
+    }
+    
+    public static Map<Move, Integer> minMoveCaptures(Board board, int levelAnalysis) {
+        Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
+        Map<Move, Integer> bestCaptureMap = new HashMap<>();
+        
+        Set<Move> captures = boardCopy.getCaptures();
+        
+        Move bestCapture = Move.undefined();
+        int bestValue = 1000;
+        
+        if (captures.size() == 0) {
+            bestCaptureMap.put(bestCapture, heuristic(boardCopy));
+            return bestCaptureMap;
+        }
+        
+        if (levelAnalysis <= 0) {
+            for (Move capture : captures) {
+                boardCopy.move(capture);
+                
+                int heuristic = heuristic(boardCopy);
+                if (heuristic <= bestValue) {
+                    bestCapture = capture;
+                    bestValue = heuristic;
+                }
+                
+                boardCopy.takeBackLastMove();
+            }
+            
+            bestCaptureMap.put(bestCapture, bestValue);
+            return bestCaptureMap;
+        }
+        
+        for (Move capture : captures) {
+            boardCopy.move(capture);
+            
+            Map<Move, Integer> responseCaptureMap = maxMoveCaptures(boardCopy, levelAnalysis-1);
+            Move bestResponseCapture = getArbitrary(responseCaptureMap.keySet());
+            int bestResponseValue = responseCaptureMap.get(bestResponseCapture);
+            
+            if (bestResponseValue <= bestValue) {
+                bestCapture = capture;
+                bestValue = bestResponseValue;
+            }
+            
+            boardCopy.takeBackLastMove();
+        }
+        
+        bestCaptureMap.put(bestCapture, bestValue);
+        return bestCaptureMap;
     }
     
     /**
@@ -117,19 +277,27 @@ public class Main {
      * @return a heuristic evaluating the board
      */
     public static int heuristic(Board board) {
-        Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
-
         int heuristic = 0;
         
-        Map<Piece, Set<Coordinate>> blackPieces = boardCopy.blackPieces();
-        Map<Piece, Set<Coordinate>> whitePieces = boardCopy.whitePieces();
+        if (board.checkMate()) {
+            if (board.turn().equals(PieceColor.WHITE)) {
+                return -1000;
+            } else if (board.turn().equals(PieceColor.BLACK)) {
+                return 1000;
+            } else {
+                throw new RuntimeException("Board turn is not one of white or black");
+            }
+        }
+        
+        Map<Piece, Set<Coordinate>> blackPieces = board.blackPieces();
+        Map<Piece, Set<Coordinate>> whitePieces = board.whitePieces();
 
         for (Piece blackPiece : blackPieces.keySet()) {
             heuristic -= blackPiece.value()*blackPieces.get(blackPiece).size();
         }
         
         for (Piece whitePiece : whitePieces.keySet()) {
-            heuristic += whitePiece.value()*blackPieces.get(whitePiece).size();
+            heuristic += whitePiece.value()*whitePieces.get(whitePiece).size();
         }
         
         return heuristic;

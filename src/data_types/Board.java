@@ -182,7 +182,9 @@ public class Board {
         
         Coordinate lastMoveCoordFrom = lastMove.coordFrom();
         Coordinate lastMoveCoordTo = lastMove.coordTo();
-        Piece lastMovePiece = lastMove.movedPieces().iterator().next();
+        Piece lastMovePiece = getArbitrary(lastMove.movedPieces());
+        
+        if (!lastMovePiece.isPawn()) {return false;}
         
         boolean pawnHadPushedTwoSquares = lastMoveCoordFrom.getX() == lastMoveCoordTo.getX() && 
                 Math.abs(lastMoveCoordFrom.getY() - lastMoveCoordTo.getY()) == 2;
@@ -235,7 +237,7 @@ public class Board {
         Set<Move> legalMoves = legalMoves();
         Set<Move> checksAndCaptures = new HashSet<>();
         
-        Set<Move> checks = getChecks(legalMoves);
+        Set<Move> checks = getChecks();
         
         for (Move move : legalMoves) {
             // add captures
@@ -253,6 +255,42 @@ public class Board {
         
         checkRep();
         return checksAndCaptures;
+    }
+    
+    /**
+     * Obtain the legal moves that capture a piece
+     * @return the legal moves that capture a piece
+     */
+    public Set<Move> getCaptures() {
+        Set<Move> captures = new HashSet<>();
+        
+        for (Move move : legalMoves()) {
+            if (move.isCapture()) {
+                captures.add(move);
+            }
+        }
+        
+        return captures;
+    }
+    
+    /**
+     * Obtain the legal moves that check the opposing king
+     * @return the legal moves that give check to the opposing king
+     */
+    public Set<Move> getChecks() {
+        Set<Move> checks = new HashSet<>();
+        
+        for (Move move : legalMoves()) {
+            move(move);
+            
+            if (inCheck()) {
+                checks.add(move);
+            }
+            
+            takeBackLastMove();
+        }
+        
+        return checks;
     }
     
    /**
@@ -960,27 +998,6 @@ public class Board {
         }
         
         return filteredMoves;
-    }
-    
-    /**
-     * Obtain the moves that are checks in a given set
-     * @param moveSet set of moves to filter for checks
-     * @return the moves in moveSet that give check to the opposing king
-     */
-    private Set<Move> getChecks(Set<Move> moveSet) {
-        Set<Move> checks = new HashSet<>();
-        
-        for (Move move : moveSet) {
-            move(move);
-            
-            if (inCheck()) {
-                checks.add(move);
-            }
-            
-            takeBackLastMove();
-        }
-        
-        return checks;
     }
     
     /**

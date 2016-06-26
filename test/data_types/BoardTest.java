@@ -326,7 +326,7 @@ public class BoardTest {
     //  - moves played includes a promotion, moves played does not include a promotion
     //  
     
-    // TODO write tests for isEnPassent
+    // TODO write tests for isEnPassent, getChecks, getCaptures
     
     @Test(expected=AssertionError.class)
     public void testAssertionsEnabled() {
