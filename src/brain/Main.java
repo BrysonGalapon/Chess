@@ -63,6 +63,7 @@ public class Main {
 
             } catch (IllegalArgumentException e) {
                 System.out.println("Move invalid. Try again");
+                continue;
             }
             
             if (board.checkMate()) {

@@ -35,6 +35,10 @@ public class Normal implements Move {
         this.squareFrom = squareFrom.squareCopy();
         this.squareTo = squareTo.squareCopy();
         
+        if (!piece().exists()) {
+            throw new IllegalArgumentException("Illegal move attempted");
+        }
+        
         if (!piece().moveSet(squareFrom.coordinate()).contains(squareTo.coordinate())) {
             throw new IllegalArgumentException("Illegal move attempted");
         }

@@ -30,8 +30,17 @@ public class Coordinate {
     
     /** Create a new chess coordinate using standard (x,y) coordinates
      *  - Requires that 0 <= x,y < Board.DEFAULT_SIZE
+     *  @throws IllegalArgumentException if given x,y out of default board grid
      */
     public Coordinate(int x, int y) {
+        if (0 > x || x >= Board.DEFAULT_SIZE) {
+            throw new IllegalArgumentException("Illegal x-coordinate");
+        }
+        
+        if (0 > y || y >= Board.DEFAULT_SIZE) {
+            throw new IllegalArgumentException("Illegal y-coordinate");
+        }
+        
         initializeMap();
         
         this.x = x;
@@ -44,6 +53,7 @@ public class Coordinate {
      * Create a new chess coordinate using chess notation
      *  - Requires that coordinate matches the regex [a-h][1-8]
      * @param coordinate
+     * @throws IllegalArgumentException if coordinate does not match a valid chess coordinate
      */
     public Coordinate(String coordinate) {
         initializeMap();

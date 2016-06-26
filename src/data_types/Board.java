@@ -137,14 +137,17 @@ public class Board {
      * Make a chess move on this Board. Flips the side to move.
      *  - requires that chessMove is contained in this.legalMoves()
      * @param chessMove move to make on this board
+     * @throws IllegalArgumentException if chessMove is not a legal move on this board
      */
-    public void move(Move chessMove) {
+    public void move(Move chessMove) throws IllegalArgumentException{
         Square squareFrom = getSquare(chessMove.coordFrom());
         
         if (! squareFrom.isOccupied())
             throw new IllegalArgumentException("Piece not found");
         
-        assert legalMoves().contains(chessMove);
+        if (!legalMoves().contains(chessMove)) {
+            throw new IllegalArgumentException("Illegal move attempted");
+        }
         
         movePiece(chessMove);
         
