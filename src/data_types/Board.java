@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -22,7 +23,7 @@ public class Board {
     
     // TODO list:
     //
-    // add UNDEFINED variant to move so to get rid of null
+    // throw IllegalArgumentExceptions in Move variant constructors to help with main method
     // make legalMoves part of rep so you don't need to recalculate it every time
     // add in stalemate, 3 move repetition, 50 move rule, and insufficient material
     // add a resign button/ draw offer button
@@ -1386,16 +1387,22 @@ public class Board {
      * @return any element contained in set
      */
     private <T> T getArbitrary(Set<T> set) {
+        Set<T> setCopy = new HashSet<>(set);
         if (set.size() == 0) {
             throw new RuntimeException("Can not remove an arbitrary element out of empty set");
         }
         
-        T arbitraryItem = null;
+        Random generator = new Random();
+        int pick = generator.nextInt(set.size());
         
-        for (T item : set) {
-            arbitraryItem = item;
+        int i = 0;
+        for (T item : setCopy) {
+            if (i == pick) {
+                return item;
+            }
+            i++;
         }
         
-        return arbitraryItem;
+        throw new RuntimeException("Item must have been picked");
     }
 }

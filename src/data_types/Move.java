@@ -25,12 +25,17 @@ public interface Move {
      * @throws IllegalArgumentException if move is an invalid chess move
      */
     public static Move createMove(Square squareFrom, Square squareTo) throws IllegalArgumentException{
+        Square squareFromCopy = squareFrom.squareCopy();
+        Square squareToCopy = squareTo.squareCopy();
+        
         Piece movedPiece = squareFrom.getPiece();
         Coordinate coordFrom = squareFrom.coordinate();
         Coordinate coordTo = squareTo.coordinate();
         
         // detect promotion
         if (movedPiece.isPawn() && ((coordTo.getY() == 7) || (coordTo.getY() == 0))) {
+            // TODO figure out how to use only *one* reader 
+            @SuppressWarnings("resource")
             Scanner reader = new Scanner(System.in);
             System.out.println("What piece would you like to promote to?");
             System.out.println("You have the option of: Q, R, B, N");
@@ -44,21 +49,19 @@ public interface Move {
                 
                 switch (piece) {
                 case "Q":
-                    return promote(squareFrom, squareTo, Piece.queen(movedPiece.color(), true));
+                    return promote(squareFromCopy, squareToCopy, Piece.queen(movedPiece.color(), true));
                 case "R":
-                    return promote(squareFrom, squareTo, Piece.rook(movedPiece.color(), true));
+                    return promote(squareFromCopy, squareToCopy, Piece.rook(movedPiece.color(), true));
                 case "B":
-                    return promote(squareFrom, squareTo, Piece.bishop(movedPiece.color(), true));
+                    return promote(squareFromCopy, squareToCopy, Piece.bishop(movedPiece.color(), true));
                 case "N":
-                    return promote(squareFrom, squareTo, Piece.knight(movedPiece.color(), true));
+                    return promote(squareFromCopy, squareToCopy, Piece.knight(movedPiece.color(), true));
                 default:
                     throw new RuntimeException("Regex failed to capture only queen, rook, bishop, or knight promotions");
                 }
                 
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                reader.close();
             }
         }
         
