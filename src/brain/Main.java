@@ -4,8 +4,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+
+import javax.swing.JOptionPane;
 
 import data_types.Board;
 import data_types.Coordinate;
@@ -20,52 +23,36 @@ public class Main {
     
     public static void main(String[] args) {
         Board board = new Board();
-        Scanner reader = new Scanner(System.in);
+        
+        BlockingQueue<Move> moveQueue = new LinkedBlockingDeque<Move>();
+        
+        GUI gui = configureGUI(board, moveQueue);
         
         PieceColor playerSide = pickSide();
         
         // initial startup
         if (playerSide.equals(PieceColor.WHITE)) {
-            System.out.println("You are white. Good luck!\n");
+            JOptionPane.showMessageDialog(null, "You are white. Good luck!");
         } else if (playerSide.equals(PieceColor.BLACK)) {
-            System.out.println("You are black. Good luck!\n");
+            JOptionPane.showMessageDialog(null, "You are black. Good luck!");
+            
             Move computerMove = getComputerMove(board);
             board.move(computerMove);
-            System.out.println("Computer made move: " + computerMove);
+            gui.refreshBoard();
         } else {
-            reader.close();
             throw new RuntimeException("Side to play is not either white or black");
         }
         
         while (!board.checkMate()) {
-            System.out.println();
-            System.out.println(board);
-            System.out.println("Evaluation: " + heuristic(board));
-            
-            // player turn
-            System.out.print("Square to move piece from: ");
-            String squareFrom = reader.nextLine();
-            
-            System.out.print("Square to move piece to: ");
-            String squareTo = reader.nextLine();
-            System.out.println();
-            
+            Move move;
             try {
-                Move move;
-                
-                if (board.isEnPassent(new Coordinate(squareFrom), new Coordinate(squareTo))) {
-                    move = Move.enPassent(board.getSquare(squareFrom), board.getSquare(squareTo));
-                } else {
-                    move = Move.createMove(board.getSquare(squareFrom), board.getSquare(squareTo));
-                }
-                
+                move = moveQueue.take();
                 board.move(move);
-                System.out.println("You made move: " + move);
-                System.out.println(board);
-                System.out.println("Evaluation: " + heuristic(board));
-
+                gui.refreshBoard();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             } catch (IllegalArgumentException e) {
-                System.out.println("Move invalid. Try again");
+                JOptionPane.showMessageDialog(null, "Invalid move, Please try again.");
                 continue;
             }
             
@@ -76,18 +63,14 @@ public class Main {
             // computer turn
             Move computerMove = getComputerMove(board);
             board.move(computerMove);
-            System.out.println("Computer made move: " + computerMove);
+            gui.refreshBoard();
         }
         
         if (board.turn().equals(PieceColor.WHITE)) {
-            System.out.println(PieceColor.BLACK + " wins!\n");
+            JOptionPane.showMessageDialog(null, PieceColor.BLACK + " wins!");
         } else {
-            System.out.println(PieceColor.WHITE + " wins!\n");
+            JOptionPane.showMessageDialog(null, PieceColor.WHITE + " wins!");
         }
-
-        reader.close();
-        System.out.println("FINAL BOARD");
-        System.out.println(board);
     }
     
     /**
@@ -303,8 +286,8 @@ public class Main {
         return heuristic;
     }
     
-    public static GUI configureGUI(Board board) {
-        GUI gui = new GUI(board);
+    public static GUI configureGUI(Board board, BlockingQueue<Move> moveQueue) {
+        GUI gui = new GUI(board, moveQueue);
         return gui;
     }
     
