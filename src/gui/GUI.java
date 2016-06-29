@@ -32,6 +32,7 @@ public class GUI extends JFrame{
     private final static int GRID_SIZE = BOARD_SIZE + COORDINATE_SYSTEM_MARGIN_LENGTH;
     
     private final Board board;
+    private final PieceColor playerSide;
     private final BlockingQueue<Coordinate> coordQueue;
     
     private final JButton[][] chessBoardSquares;
@@ -53,11 +54,12 @@ public class GUI extends JFrame{
      * Create a new GUI
      * @param board 
      */
-    public GUI(Board board, BlockingQueue<Move> moveQueue) {
+    public GUI(Board board, BlockingQueue<Move> moveQueue, PieceColor playerSide) {
         super(WINDOW_TITLE);
         setLayout(new FlowLayout());
         
         this.board = board;
+        this.playerSide = playerSide;
         
         this.chessBoardSquares = new JButton[BOARD_SIZE][BOARD_SIZE];
         this.chessBoard = new JPanel(new GridLayout(GRID_SIZE, GRID_SIZE));
@@ -87,7 +89,7 @@ public class GUI extends JFrame{
      * Refreshes the gui to be updated with current board
      */
     public void configureBoard() {
-     // create the chess buttons
+        // create the chess buttons
         Insets buttonMargin = new Insets(0, 0, 0, 0); // default button margin is not visible
         for (int row = 0; row < chessBoardSquares.length; row++) {
             for (int col = 0; col < chessBoardSquares.length; col++) {
@@ -111,14 +113,26 @@ public class GUI extends JFrame{
         
         // fill the top row
         for (int col = 0; col < BOARD_SIZE; col++) {
-            chessBoard.add(new JLabel(getColumnLetter(col), SwingConstants.CENTER));
+            if (playerSide.equals(PieceColor.WHITE)) {
+                chessBoard.add(new JLabel(getColumnLetter(col), SwingConstants.CENTER));
+            } else if (playerSide.equals(PieceColor.BLACK)) {
+                chessBoard.add(new JLabel(getColumnLetter(7-col), SwingConstants.CENTER));
+            } else {
+                throw new RuntimeException("Side is not either one of black or white");
+            }
         }
         // fill the black non-pawn piece row
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 switch (col) {
                     case 0:
-                        chessBoard.add(new JLabel(getRowNumber(row), SwingConstants.CENTER));
+                        if (playerSide.equals(PieceColor.WHITE)) {
+                            chessBoard.add(new JLabel(getRowNumber(row), SwingConstants.CENTER));
+                        } else if (playerSide.equals(PieceColor.BLACK)) {
+                            chessBoard.add(new JLabel(getRowNumber(7-row), SwingConstants.CENTER));
+                        } else {
+                            throw new RuntimeException("Side is not either one of black or white");
+                        }
                     default:
                         chessBoard.add(chessBoardSquares[col][row]);
                 }
@@ -134,7 +148,13 @@ public class GUI extends JFrame{
      * @return a coordinate representing the coordinate on the chess board
      */
     private Coordinate getBoardCoordinate(int col, int row) {
-        return new Coordinate(row, 7-col);
+        if (playerSide.equals(PieceColor.WHITE)) {
+            return new Coordinate(row, 7-col);
+        } else if (playerSide.equals(PieceColor.BLACK)) {
+            return new Coordinate(7-row, col);
+        } else {
+            throw new RuntimeException("Side is not either one of black or white");
+        }
     }
     
     /**
@@ -207,7 +227,13 @@ public class GUI extends JFrame{
      * @return the gui column that matches the given chess column
      */
     private int getCol(int col) {
-        return col;
+        if (playerSide.equals(PieceColor.WHITE)) {
+            return col;
+        } else if (playerSide.equals(PieceColor.BLACK)) {
+            return 7-col;
+        } else {
+            throw new RuntimeException("Side is not either one of black or white");
+        }
     }
     
     /**
@@ -216,7 +242,13 @@ public class GUI extends JFrame{
      * @return the gui row that matches the given chess row
      */
     private int getRow(int row) {
-        return 7-row;
+        if (playerSide.equals(PieceColor.WHITE)) {
+            return 7-row;
+        } else if (playerSide.equals(PieceColor.BLACK)) {
+            return row;
+        } else {
+            throw new RuntimeException("Side is not either one of black or white");
+        }
     }
     
     /**

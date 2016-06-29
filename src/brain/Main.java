@@ -29,9 +29,8 @@ public class Main {
     public static void main(String[] args) {
         
         moveQueue = new LinkedBlockingDeque<Move>();
-        playerSide = pickSide();
         
-        runGameTwoPlayer();
+        runGameComputer();
         
         if (board.turn().equals(PieceColor.WHITE)) {
             JOptionPane.showMessageDialog(null, PieceColor.BLACK + " wins!");
@@ -44,7 +43,7 @@ public class Main {
      * Play a two-player game
      */
     private static void runGameTwoPlayer() {
-        gui = configureGUI(board, moveQueue);
+        gui = configureGUI(board, moveQueue, PieceColor.WHITE);
         
         while (!board.checkMate()) {
             Move move;
@@ -65,7 +64,8 @@ public class Main {
      * Play a game against a computer
      */
     private static void runGameComputer() {
-        gui = configureGUI(board, moveQueue);
+        playerSide = pickSide();
+        gui = configureGUI(board, moveQueue, playerSide);
         
         // initial startup
         if (playerSide.equals(PieceColor.WHITE)) {
@@ -326,8 +326,15 @@ public class Main {
         return heuristic;
     }
     
-    public static GUI configureGUI(Board board, BlockingQueue<Move> moveQueue) {
-        GUI gui = new GUI(board, moveQueue);
+    /**
+     * Configure the GUI
+     * @param board board to show on GUI
+     * @param moveQueue message passing queue for moves between Controller and Main
+     * @param playerSide side of the board that will be oriented to
+     * @return a GUI that represents a window configured as described above
+     */
+    private static GUI configureGUI(Board board, BlockingQueue<Move> moveQueue, PieceColor playerSide) {
+        GUI gui = new GUI(board, moveQueue, playerSide);
         return gui;
     }
     
