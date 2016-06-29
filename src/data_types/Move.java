@@ -34,6 +34,22 @@ public interface Move {
         
         // detect promotion
         if (movedPiece.isPawn() && ((coordTo.getY() == 7) || (coordTo.getY() == 0))) {
+            
+            // white can't promote on 1st rank
+            if (movedPiece.color().equals(PieceColor.WHITE) && coordTo.getY() == 0) {
+                throw new IllegalArgumentException("Invalid promotion");
+            }
+            
+            // black can't promote on 8th rank
+            if (movedPiece.color().equals(PieceColor.BLACK) && coordTo.getY() == 7) {
+                throw new IllegalArgumentException("Invalid promotion");
+            }
+            
+            // can only promote to a square you can reach
+            if (!movedPiece.moveSet(coordFrom).contains(coordTo)) {
+                throw new IllegalArgumentException("Unreachable destination");
+            }
+            
             // TODO figure out how to use only *one* reader 
             @SuppressWarnings("resource")
             Scanner reader = new Scanner(System.in);

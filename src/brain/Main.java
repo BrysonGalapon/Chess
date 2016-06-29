@@ -21,14 +21,51 @@ import gui.GUI;
 public class Main {
     private final static int ENGINE_WAIT_TIME = 5000; // milliseconds 
     
+    private final static Board board = new Board();
+    private static PieceColor playerSide;
+    private static GUI gui;
+    private static BlockingQueue<Move> moveQueue;
+    
     public static void main(String[] args) {
-        Board board = new Board();
         
-        BlockingQueue<Move> moveQueue = new LinkedBlockingDeque<Move>();
+        moveQueue = new LinkedBlockingDeque<Move>();
+        playerSide = pickSide();
         
-        GUI gui = configureGUI(board, moveQueue);
+        runGameTwoPlayer();
         
-        PieceColor playerSide = pickSide();
+        if (board.turn().equals(PieceColor.WHITE)) {
+            JOptionPane.showMessageDialog(null, PieceColor.BLACK + " wins!");
+        } else {
+            JOptionPane.showMessageDialog(null, PieceColor.WHITE + " wins!");
+        }
+    }
+    
+    /**
+     * Play a two-player game
+     */
+    private static void runGameTwoPlayer() {
+        gui = configureGUI(board, moveQueue);
+        
+        while (!board.checkMate()) {
+            Move move;
+            try {
+                move = moveQueue.take();
+                board.move(move);
+                gui.refreshBoard();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                JOptionPane.showMessageDialog(null, "Invalid move, Please try again.");
+                continue;
+            }
+        }
+    }
+    
+    /**
+     * Play a game against a computer
+     */
+    private static void runGameComputer() {
+        gui = configureGUI(board, moveQueue);
         
         // initial startup
         if (playerSide.equals(PieceColor.WHITE)) {
@@ -65,12 +102,6 @@ public class Main {
             board.move(computerMove);
             gui.refreshBoard();
         }
-        
-        if (board.turn().equals(PieceColor.WHITE)) {
-            JOptionPane.showMessageDialog(null, PieceColor.BLACK + " wins!");
-        } else {
-            JOptionPane.showMessageDialog(null, PieceColor.WHITE + " wins!");
-        }
     }
     
     /**
@@ -94,11 +125,16 @@ public class Main {
     
     public static Move getComputerMove(Board board) {
         Board boardCopy = new Board(board.whitePieces(), board.blackPieces(), board.turn(), board.getLastMove());
+        int originalHeuristic = heuristic(boardCopy);
         
         if (boardCopy.turn().equals(PieceColor.WHITE)) {
             Map<Move, Integer> bestCaptureMap = maxMoveCaptures(boardCopy, 5);
             Move bestCapture = getArbitrary(bestCaptureMap.keySet());
             int bestCaptureValue = bestCaptureMap.get(bestCapture);
+            
+            if (bestCaptureValue-originalHeuristic > 0) {
+                return bestCapture;
+            }
             
             Move bestNormalMove = Move.undefined();
             int bestNormalValue = -1000;
@@ -126,6 +162,10 @@ public class Main {
             Map<Move, Integer> bestCaptureMap = minMoveCaptures(boardCopy, 5);
             Move bestCapture = getArbitrary(bestCaptureMap.keySet());
             int bestCaptureValue = bestCaptureMap.get(bestCapture);
+            
+            if (bestCaptureValue-originalHeuristic < 0) {
+                return bestCapture;
+            }
             
             Move bestNormalMove = Move.undefined();
             int bestNormalValue = 1000;
