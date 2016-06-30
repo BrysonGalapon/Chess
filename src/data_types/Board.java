@@ -20,6 +20,7 @@ public class Board {
     private final Square[][] grid = new Square[DEFAULT_SIZE][DEFAULT_SIZE];
     private PieceColor turn;
     private List<Move> movesPlayed = new ArrayList<>();
+    private final Set<Move> legalMoves = new HashSet<>();
     
     // TODO list:
     //
@@ -92,6 +93,7 @@ public class Board {
     public Board(Map<Piece, Set<Coordinate>> whitePieces, Map<Piece, Set<Coordinate>> blackPieces, PieceColor turn, Move lastMove){
         createEmptyGrid();
         this.turn = turn;
+        
         if (!lastMove.isUndefined()) {
             movesPlayed.add(lastMove);
         }
@@ -160,6 +162,7 @@ public class Board {
         }
         
         this.movesPlayed.add(chessMove);
+        this.legalMoves.removeAll(legalMoves);
         changeTurn();
         checkRep();
     }
@@ -217,6 +220,7 @@ public class Board {
         
         // remove the last element from movesPlayed
         movesPlayed.remove(lastMove); 
+        this.legalMoves.removeAll(legalMoves);
     }
     
     /**
@@ -368,6 +372,9 @@ public class Board {
      * @return a set of all legal moves the current player has
      */
     public Set<Move> legalMoves() {
+        if (this.legalMoves.size() != 0) {
+            return this.legalMoves;
+        }
         
         Set<Move> legalMoves = new HashSet<>();
         
@@ -582,6 +589,7 @@ public class Board {
         }
         
         forceSetSquare(squareCopy);
+        this.legalMoves.removeAll(legalMoves);
         checkRep();
     }
     
@@ -610,6 +618,7 @@ public class Board {
         } else {
             this.turn = PieceColor.BLACK;
         }
+        this.legalMoves.removeAll(legalMoves);
     }
     
     /**
