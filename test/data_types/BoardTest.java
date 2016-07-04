@@ -232,13 +232,13 @@ public class BoardTest {
         Move move = Move.createMove(board.getSquare("c1"), board.getSquare("g5"));
         double createMoveLength = System.currentTimeMillis() - createMoveStartTime;
         
-        double moveStartTime = System.currentTimeMillis();
-        board.move(move);
-        double moveLength = System.currentTimeMillis() - moveStartTime;
-        
         double legalMovesStartTime = System.currentTimeMillis();
         board.legalMoves();
         double legalMovesLength = System.currentTimeMillis() - legalMovesStartTime;
+        
+        double moveStartTime = System.currentTimeMillis();
+        board.move(move);
+        double moveLength = System.currentTimeMillis() - moveStartTime;
         
         double checkMateStartTime = System.currentTimeMillis();
         board.checkMate();

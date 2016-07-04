@@ -21,6 +21,7 @@ public class Board {
     private PieceColor turn;
     private List<Move> movesPlayed = new ArrayList<>();
     private final Set<Move> legalMoves = new HashSet<>();
+    private final Set<Move> legalMovesBeforeMove = new HashSet<>();
     
     // TODO list:
     //
@@ -162,6 +163,7 @@ public class Board {
         }
         
         this.movesPlayed.add(chessMove);
+        this.legalMovesBeforeMove.addAll(this.legalMoves);
         this.legalMoves.removeAll(legalMoves);
         changeTurn();
         checkRep();
@@ -221,6 +223,8 @@ public class Board {
         // remove the last element from movesPlayed
         movesPlayed.remove(lastMove); 
         this.legalMoves.removeAll(legalMoves);
+        this.legalMoves.addAll(legalMovesBeforeMove);
+        this.legalMovesBeforeMove.removeAll(legalMovesBeforeMove);
     }
     
     /**
@@ -590,6 +594,7 @@ public class Board {
         
         forceSetSquare(squareCopy);
         this.legalMoves.removeAll(legalMoves);
+        this.legalMovesBeforeMove.removeAll(legalMovesBeforeMove);
         checkRep();
     }
     
@@ -619,6 +624,7 @@ public class Board {
             this.turn = PieceColor.BLACK;
         }
         this.legalMoves.removeAll(legalMoves);
+        this.legalMovesBeforeMove.removeAll(legalMovesBeforeMove);
     }
     
     /**

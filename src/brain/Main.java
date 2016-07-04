@@ -128,7 +128,7 @@ public class Main {
         int originalHeuristic = heuristic(boardCopy);
         
         if (boardCopy.turn().equals(PieceColor.WHITE)) {
-            Map<Move, Integer> bestCaptureMap = maxMoveCaptures(boardCopy, 5);
+            Map<Move, Integer> bestCaptureMap = maxMoveCaptures(boardCopy, 3);
             Move bestCapture = getArbitrary(bestCaptureMap.keySet());
             int bestCaptureValue = bestCaptureMap.get(bestCapture);
             
@@ -142,7 +142,7 @@ public class Main {
             for (Move move : boardCopy.legalMoves()) {
                 if (!move.isCapture()) {
                     boardCopy.move(move);
-                    Map<Move, Integer> bestResponseMap = minMoveCaptures(boardCopy, 3);
+                    Map<Move, Integer> bestResponseMap = minMoveCaptures(boardCopy, 2);
                     Move bestResponseCapture = getArbitrary(bestResponseMap.keySet());
                     int bestResponseValue = bestResponseMap.get(bestResponseCapture);
                     
@@ -159,7 +159,7 @@ public class Main {
             
             return bestCapture;
         } else if (boardCopy.turn().equals(PieceColor.BLACK)) {
-            Map<Move, Integer> bestCaptureMap = minMoveCaptures(boardCopy, 5);
+            Map<Move, Integer> bestCaptureMap = minMoveCaptures(boardCopy, 3);
             Move bestCapture = getArbitrary(bestCaptureMap.keySet());
             int bestCaptureValue = bestCaptureMap.get(bestCapture);
             
@@ -173,7 +173,7 @@ public class Main {
             for (Move move : boardCopy.legalMoves()) {
                 if (!move.isCapture()) {
                     boardCopy.move(move);
-                    Map<Move, Integer> bestResponseMap = maxMoveCaptures(boardCopy, 3);
+                    Map<Move, Integer> bestResponseMap = maxMoveCaptures(boardCopy, 2);
                     Move bestResponseCapture = getArbitrary(bestResponseMap.keySet());
                     int bestResponseValue = bestResponseMap.get(bestResponseCapture);
                     
